@@ -5,5 +5,6 @@ require 'capybara'
 require 'erubis'
 require 'haml'
 require 'tilt'
+require 'sinatra'
 
-require 'markup_helpers'
+require 'tiny'

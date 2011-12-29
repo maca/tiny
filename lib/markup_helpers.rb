@@ -1,8 +1,37 @@
-require "markup_helpers/version"
-require "markup_helpers/tilt" if Object.const_defined? :Tilt
+require "tilt"
+require "rack/utils"
 
-module MarkupHelpers
+require "tiny/version"
+require "tiny/tilt"
+
+module Tiny
   include Haml::Helpers if const_defined? :Haml
+
+  class Context
+    include MarkupHelpers
+    attr_reader :buffer
+
+    def initialize scope, &block
+      @buffer, @scope = '', scope
+      instance_eval &block
+    end
+
+    def tag *args
+      @buffer << super(*args)
+    end
+
+    def text content
+      @buffer << Rack::Utils.escape_html(content)
+    end
+
+    def text! content
+      @buffer << content
+    end
+
+    def method_missing *args
+      @scope.send *args
+    end
+  end
 
   def tag tag_name, content_or_attrs = {}, attrs = nil, &block
     if attrs.nil? && Hash === content_or_attrs
@@ -19,14 +48,35 @@ module MarkupHelpers
     end.compact.join(' ')
 
     attrs   = " #{attrs}" unless attrs.empty?
-    if block_given?
-      content = respond_to?(:capture) ? capture(&block) : yield 
-    end
+    content = capture(&block) if block_given?
     output  = %{<#{tag_name}#{attrs}>#{content}</#{tag_name}>}
-    block_given? && respond_to?(:concat) ? concat(output) : output
+    block_given? ? concat(output) : output
   end
 
   private
+  def capture &block
+    case @__tilt_context
+    when Tilt::ErubisTemplate, Tilt::ERBTemplate
+      erb_capture &block
+    when Tilt::HamlTemplate
+      capture_haml &block
+    else
+      scope = Context === self ? @scope : self 
+      Context.new(scope, &block).buffer
+    end
+  end
+
+  def concat content
+    case @__tilt_context
+    when Tilt::ErubisTemplate, Tilt::ERBTemplate
+      erb_buffer << content
+    when Tilt::HamlTemplate
+      haml_concat content
+    else
+      content
+    end
+  end
+ 
   def erb_capture
     old_buffer = erb_buffer.dup
     erb_buffer.clear and yield

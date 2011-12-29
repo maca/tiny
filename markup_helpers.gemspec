@@ -1,22 +1,25 @@
-# -*- encoding: utf-8 -*-
+# encoding: utf-8
 $:.push File.expand_path("../lib", __FILE__)
-require "markup_helpers/version"
+require "tiny/version"
 
 Gem::Specification.new do |s|
-  s.name        = "markup_helpers"
-  s.version     = MarkupHelpers::VERSION
+  s.name        = "tiny"
+  s.version     = Tiny::VERSION
   s.authors     = ["Macario"]
   s.email       = ["macarui@gmail.com"]
   s.homepage    = ""
-  s.summary     = %q{Framework agnostic markup helpers}
-  s.description = %q{Framework agnostic markup helpers}
+  s.summary     = %q{Framework agnostic markup builder, useful for building view helpers or as a micro templating dsl, plays nice with erb and haml}
+  s.description = %q{Tiny is a tiny framework agnostic markup builder, useful for building view helpers on inclusion only adds three public methods, tag (for generating html tags), capture and concat, works as pure ruby and with erb and haml}
 
-  s.rubyforge_project = "markup_helpers"
+  s.rubyforge_project = "tiny"
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
+
+  s.add_runtime_dependency 'tilt'
+  s.add_runtime_dependency 'rack'
 
   s.add_development_dependency 'rake'
   s.add_development_dependency 'rspec'
