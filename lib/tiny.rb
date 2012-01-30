@@ -80,15 +80,15 @@ module Tiny
     end
 
     def text content
-      @buffer << Rack::Utils.escape_html(content)
+      @buffer << Rack::Utils.escape_html(content.to_s)
     end
 
     def text! content
-      @buffer << content
+      @buffer << content.to_s
     end
 
-    def method_missing *args
-      @scope.send *args
+    def method_missing *args, &block
+      @scope.send *args, &block
     end
   end
 
