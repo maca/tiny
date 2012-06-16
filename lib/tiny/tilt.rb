@@ -1,11 +1,11 @@
 module Tilt
   class Template
+    alias :__render :render
+
     def render scope = Object.new, locals = {}, &block
       scope.instance_variable_set :@__tilt_context, self
-      output = evaluate scope, locals || {}, &block
-      if scope.instance_variable_get :@__tilt_context
-        scope.send :remove_instance_variable, :@__tilt_context
-      end
+      output = __render scope, locals, &block
+      scope.send :remove_instance_variable, :@__tilt_context
       output
     end
   end
