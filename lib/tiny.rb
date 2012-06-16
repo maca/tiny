@@ -2,7 +2,7 @@ require "tilt"
 require "rack/utils"
 
 require "tiny/version"
-require "tiny/tilt"
+require "ext/tilt/template"
 
 module Tiny
   include Haml::Helpers if const_defined? :Haml

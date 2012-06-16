@@ -41,100 +41,23 @@ describe 'markup helpers' do
         it { output.should have_css 'li.item' }
         it { output.should have_css 'li.in-stock' }
       end
-
-      describe 'in erb' do
-        before do
-          @output = Tilt['erb'].new { '<%= tag(:li, "Hello") %>' }.render(self)
-        end
-        it { output.should have_css 'li', :text => "Hello" }
-      end
-
-      describe 'in haml' do
-        before do
-          @output = Tilt['haml'].new { '= tag(:li, "Hello")' }.render(self)
-        end
-        it { output.should have_css 'li', :text => "Hello" }
-      end
     end
 
     describe 'shallow blocks' do
-      describe 'in ruby' do
-        before do
-          @output = tag(:li) { tag(:a, 'Hello') }
-        end
-        it { output.should have_css 'li' }
-        it { output.should have_css 'li > a', :text => 'Hello' }
+      before do
+        @output = tag(:li) { tag(:a, 'Hello') }
       end
-
-      describe 'in erb' do
-        before do
-          @output = Tilt['erb'].new(:outvar => '@_out_buf') do 
-            <<-ERB
-            <% tag(:li) do %>
-              <%= tag(:a, 'Hello') %>
-            <% end %>
-            ERB
-          end.render(self)
-        end
-        it { output.should have_css 'li' }
-        it { output.should have_css 'li > a', :text => 'Hello' }
-      end
-
-      describe 'in haml' do
-        before do
-          @output = Tilt['haml'].new(:outvar => '@_out_buf') do 
-            <<-ERB
-- tag(:li) do
-  = tag(:a, 'Hello')
-            ERB
-          end.render(self)
-        end
-        it { output.should have_css 'li' }
-        it { output.should have_css 'li > a', :text => 'Hello' }
-      end
+      it { output.should have_css 'li' }
+      it { output.should have_css 'li > a', :text => 'Hello' }
     end
 
     describe 'deeper blocks' do
-      describe 'in ruby' do
-        before do
-          @output = tag(:li) { tag(:a, 'Hello') { tag(:img) } }
-        end
-        it { output.should have_css 'li' }
-        it { output.should have_css 'li > a' }
-        it { output.should have_css 'li > a > img' }
+      before do
+        @output = tag(:li) { tag(:a, 'Hello') { tag(:img) } }
       end
-
-      describe 'in erb' do
-        before do
-          @output = Tilt['erb'].new(:outvar => '@_out_buf') do 
-            <<-ERB
-            <% tag(:li) do %>
-              <% tag(:a, 'Hello') do %>
-                <%= tag(:img) %>
-              <% end %>
-            <% end %>
-            ERB
-          end.render(self)
-        end
-        it { output.should have_css 'li' }
-        it { output.should have_css 'li > a' }
-        it { output.should have_css 'li > a > img' }
-      end
-
-      describe 'in haml' do
-        before do
-          @output = Tilt['haml'].new(:outvar => '@_out_buf') do 
-            <<-ERB
-- tag(:li) do
-  - tag(:a, 'Hello') do
-    = tag(:img)
-            ERB
-          end.render(self)
-        end
-        it { output.should have_css 'li' }
-        it { output.should have_css 'li > a' }
-        it { output.should have_css 'li > a > img' }
-      end
+      it { output.should have_css 'li' }
+      it { output.should have_css 'li > a' }
+      it { output.should have_css 'li > a > img' }
     end
 
     describe 'buffering' do
