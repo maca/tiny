@@ -55,10 +55,9 @@ module Tiny
 
     def render
       content = render_content
-      # soft tabs
       content.gsub!(/^(?!\s*$)/, "  ")
       # Following line breaks 1.8.7 compatibility
-      content.gsub!(/\A(?!\s*$)|(?<!^)\z/, "\r\n") 
+      content.gsub!(/\A(?!$)|(?<!^)\z/, "\n") 
       
       %{<#{tag_name}#{tag_attributes}>#{content}</#{tag_name}>}
     end
@@ -68,11 +67,11 @@ module Tiny
     end
 
     def text content
-      @buffer << Rack::Utils.escape_html(content.to_s) + "\r\n"
+      @buffer << Rack::Utils.escape_html(content.to_s) + "\n"
     end
 
     def text! content
-      @buffer << content.to_s + "\r\n"
+      @buffer << content.to_s + "\n"
     end
 
     def respond_to? method
@@ -81,6 +80,7 @@ module Tiny
 
     private
     def render_content
+      # Following line breaks 1.8.7 compatibility
       instance_exec(self, &@block) if @block
       @buffer.strip
     end

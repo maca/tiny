@@ -25,44 +25,45 @@ describe 'markup helpers' do
         output.should have_css 'div', :text => "Hello"
       end
     end
+  end
 
-    describe 'passing blocks' do
-      describe 'shallow' do
-        before do
-          @output = Tilt['haml'].new do 
-            <<-HAML
+  describe 'passing blocks' do
+    describe 'shallow' do
+      before do
+        @output = Tilt['haml'].new do 
+          <<-HAML
 = tag(:div) do
   = tag(:a) do
     Hello
-            HAML
-          end.render(self)
-        end
-        it { output.should have_css 'div' }
-        it { output.should have_css 'div > a', :text => 'Hello' }
+          HAML
+        end.render(self)
       end
+      it { output.should have_css 'div' }
+      it { output.should have_css 'div > a', :text => 'Hello' }
+    end
 
-      it 'should pass widget to block' do
-        Tilt['haml'].new do 
-          <<-HAML
+    it 'should pass widget to block' do
+      Tilt['haml'].new do 
+        <<-HAML
 = tag(:div) do |div|
   - div.should be_a Tiny::Widget 
   = tag(:a) do |a|
     - a.tag_name.should == :a
-          HAML
-        end.render(self)
-      end
+        HAML
+      end.render(self)
+    end
 
-      describe 'nested' do
-        before do
-          @output = Tilt['haml'].new do 
-            <<-HAML
+    describe 'nested' do
+      before do
+        @output = Tilt['haml'].new do 
+          <<-HAML
 = tag(:ul) do
   = tag(:li) do
     = tag(:a) do
       Hey
       = tag(:span) do
         Ho
-            HAML
+          HAML
           end.render(self)
         end
         it { output.should have_css 'ul' }
@@ -71,6 +72,29 @@ describe 'markup helpers' do
         it { output.should have_css 'ul > li > a', :text => 'Hey' }
         it { output.should have_css 'ul > li > a > span', :text => 'Ho' }
       end
+    end
+
+  describe 'formatting' do
+    it 'shuould concat with newlines and indentation' do
+      output = Tilt['haml'].new do 
+        <<-HAML
+= tag(:ul) do
+  = tag(:li)
+        HAML
+      end.render(self)
+      output.should == "<ul>\n  <li></li>\n</ul>\n"
+    end
+
+    it 'shuould concat with newlines after text' do
+      output = Tilt['haml'].new do 
+        <<-HAML
+= tag(:ul) do
+  = tag(:li) do
+    Hi
+    Hi
+        HAML
+      end.render(self)
+      output.should == "<ul>\n  <li>\n    Hi\n    Hi\n  </li>\n</ul>\n"
     end
   end
 end

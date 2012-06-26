@@ -138,7 +138,7 @@ describe 'markup helpers' do
         output = tag(:ul) do
           tag (:li)
         end
-        output.should == "<ul>\r\n  <li></li>\r\n</ul>"
+        output.should == "<ul>\n  <li></li>\n</ul>"
       end
 
       it 'shuould concat with newlines after text' do
@@ -148,7 +148,7 @@ describe 'markup helpers' do
             text! 'Hi'
           end
         end
-        output.should == "<ul>\r\n  <li>\r\n    Hi\r\n    Hi\r\n  </li>\r\n</ul>"
+        output.should == "<ul>\n  <li>\n    Hi\n    Hi\n  </li>\n</ul>"
       end
     end
   end
