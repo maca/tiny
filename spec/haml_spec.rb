@@ -18,9 +18,9 @@ describe 'markup helpers' do
 
     describe 'shallow blocks' do
       before do
-        @output = Tilt['haml'].new(:outvar => '@_out_buf') do 
+        @output = Tilt['haml'].new do 
           <<-ERB
-- tag(:li) do
+= tag(:li) do
   = tag(:a, 'Hello')
           ERB
         end.render(self)
@@ -31,10 +31,10 @@ describe 'markup helpers' do
 
     describe 'deeper blocks' do
       before do
-        @output = Tilt['haml'].new(:outvar => '@_out_buf') do 
+        @output = Tilt['haml'].new do 
           <<-ERB
-- tag(:li) do
-  - tag(:a, 'Hello') do
+= tag(:li) do
+  = tag(:a, 'Hello') do
     = tag(:img)
           ERB
         end.render(self)

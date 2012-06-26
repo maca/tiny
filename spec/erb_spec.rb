@@ -1,5 +1,6 @@
 # encoding: utf-8
 require 'spec_helper'
+require 'erubis'
 
 describe 'markup helpers' do
   include Tiny::Helpers
@@ -11,20 +12,22 @@ describe 'markup helpers' do
   describe 'tag' do
     describe 'basic' do
       before do
-        @output = Tilt['erb'].new { '<%= tag(:li, "Hello") %>' }.render(self)
+        @output = Tilt['erb'].new(:outvar => '@_out_buf') do
+           '<%= tag(:li, "Hello") %>'
+        end.render(self)
       end
       it { output.should have_css 'li', :text => "Hello" }
     end
 
     describe 'shallow blocks' do
       before do
-        @output = Tilt['erb'].new do 
+        @output = Tilt['erb'].new(:outvar => '@_out_buf') do 
           <<-ERB
             <% tag(:li) do %>
               <%= tag(:a, 'Hello') %>
             <% end %>
           ERB
-        end.render(self).tap { |e| puts e }
+        end.render(self)
       end
       it { output.should have_css 'li' }
       it { output.should have_css 'li > a', :text => 'Hello' }
@@ -32,7 +35,7 @@ describe 'markup helpers' do
 
     describe 'deeper blocks' do
       before do
-        @output = Tilt['erb'].new do 
+        @output = Tilt['erb'].new(:outvar => '@_out_buf') do 
           <<-ERB
             <% tag(:li) do %>
               <% tag(:a, 'Hello') do %>

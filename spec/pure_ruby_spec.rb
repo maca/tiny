@@ -61,7 +61,7 @@ describe 'markup helpers' do
     end
 
     describe 'buffering' do
-      describe 'basic' do
+      describe 'concatenation' do
         before do
           @output = tag(:ul) do
             tag(:li, 'One')
