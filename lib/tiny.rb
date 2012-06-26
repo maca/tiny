@@ -10,9 +10,10 @@ module Tiny
     def tag name, attrs = {}, &block
       case @__tilt_context
       when Tilt::ErubisTemplate, Tilt::ERBTemplate
-        erb_buffer << Widget.new(self, name, attrs) do |widget|
-          text! capture_erb(widget, &block) if block_given?
+        content = Widget.new(self, name, attrs) do |widget|
+          text! capture_erb(widget, &block).strip if block_given?
         end.render 
+        block_given?? erb_buffer << content : content
       when Tilt::HamlTemplate
         Widget.new(self, name, attrs) do |widget|
           text! capture_haml(widget, &block) if block_given?
