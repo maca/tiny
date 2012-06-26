@@ -104,13 +104,19 @@ describe 'markup helpers' do
       end
 
       describe 'method forwarding' do
-        describe 'basic' do
-          it 'should forward' do
-            @output = '<br>'
-            tag(:ul) do
-              tag(:li) { output.should_not be_nil }
-            end
+        it 'should forward' do
+          @output = '<br>'
+          tag(:ul) do
+            tag(:li) { output.should_not be_nil }
           end
+        end
+
+        it 'should not delegate respond to if responds to' do
+          tag(:div) { |tag| tag.should respond_to :text! }
+        end
+
+        it 'should delegate respond to if doesnt responds to' do
+          tag(:div) { |tag| tag.should respond_to :output }
         end
       end
 

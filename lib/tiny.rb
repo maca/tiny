@@ -55,8 +55,10 @@ module Tiny
 
     def render
       content = render_content
+      # soft tabs
       content.gsub!(/^(?!\s*$)/, "  ")
-      content.gsub!(/\A(?!\s*$)|(?<!^)\z/, "\r\n") # No 1.8.7 compatibility
+      # Following line breaks 1.8.7 compatibility
+      content.gsub!(/\A(?!\s*$)|(?<!^)\z/, "\r\n") 
       
       %{<#{tag_name}#{tag_attributes}>#{content}</#{tag_name}>}
     end
@@ -71,6 +73,10 @@ module Tiny
 
     def text! content
       @buffer << content.to_s + "\r\n"
+    end
+
+    def respond_to? method
+      super or @scope.respond_to? method
     end
 
     private
