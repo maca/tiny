@@ -6,37 +6,28 @@ require "tiny/version"
 require "ext/tilt/template"
 
 module Tiny
-  include Haml::Helpers if const_defined? :Haml
-
-  module CaptureHelpers
-    private
-    def capture &block
+  module Helpers
+    def tag name, attrs = {}, &block
       case @__tilt_context
       when Tilt::ErubisTemplate, Tilt::ERBTemplate
-        erb_capture &block
+        erb_buffer << Widget.new(self, name, attrs) do |widget|
+          text! capture_erb(widget, &block) if block_given?
+        end.render 
       when Tilt::HamlTemplate
-        capture_haml &block
-      else
-        scope = Tag === self ? @scope : self 
-        Tag.new(scope, &block).buffer
+        Widget.new(self, name, attrs) do |widget|
+          text! capture_haml(widget, &block) if block_given?
+        end.render 
+      when nil
+        Widget.new(self, name, attrs, &block).render 
       end
     end
 
-    def concat content
-      case @__tilt_context
-      when Tilt::ErubisTemplate, Tilt::ERBTemplate
-        erb_buffer << content
-      else
-        content
-      end
-    end
-
-    def erb_capture
+    def capture_erb *args
       buffer = erb_buffer.dup
-      erb_buffer.clear and yield
+      erb_buffer.clear and yield(*args)
       return erb_buffer.dup
     ensure
-      erb_buffer.replace(buffer)
+      erb_buffer.replace buffer
     end
 
     def erb_buffer
@@ -45,49 +36,29 @@ module Tiny
     end
   end
 
-  module Helpers
-    def tag name, content_or_attrs = {}, attrs = nil, &block
-      Tag.new(self, name, content_or_attrs, attrs, &block).render 
-    end
-
-    class << self
-      def included base
-        base.send :include, CaptureHelpers
-      end
-    end
-  end
-
-  class Tag
-    include Helpers
+  class Widget
     attr_reader :tag_name, :attrs
 
-    def initialize scope, tag_name, content_or_attrs = {}, attrs = nil, &block
-      @buffer, @scope, @tag_name, @block = '', scope, tag_name, block
-      if attrs.nil? && Hash === content_or_attrs
-        @attrs   = content_or_attrs 
-      else
-        @attrs   = attrs || {}
-        @content = content_or_attrs
-      end
+    def initialize scope, tag_name, attrs = {}, &block
+      @scope, @tag_name, @attrs, @block = scope, tag_name, attrs, block
+      @buffer = ''
     end
 
-    def render
+    def tag_attributes
       tag_attrs = attrs.map do |name, val|
         next if val.nil? || val == []
         val == true ? name : %{#{name}="#{[*val].join(' ')}"}
       end.compact.join(' ')
 
-      tag_attrs = " #{tag_attrs}" unless tag_attrs.empty?
-      %{<#{tag_name}#{tag_attrs}>#{content}</#{tag_name}>}
+      tag_attrs.empty?? '' : " #{tag_attrs}"
     end
 
-    private
-    def content
-      @block and instance_exec(self, &@block) or @content
+    def render
+      %{<#{tag_name}#{tag_attributes}>#{render_content}</#{tag_name}>}
     end
 
-    def tag *args
-      @buffer << super(*args)
+    def tag *args, &block
+      @buffer << Widget.new(@scope, *args, &block).render 
     end
 
     def text content
@@ -96,6 +67,12 @@ module Tiny
 
     def text! content
       @buffer << content.to_s
+    end
+
+    private
+    def render_content
+      instance_exec(self, &@block) if @block
+      @buffer
     end
 
     def method_missing *args, &block

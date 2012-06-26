@@ -11,43 +11,68 @@ describe 'markup helpers' do
 
   describe 'tag' do
     describe 'basic' do
-      before do
+      it 'should emit tag' do
         @output = Tilt['erb'].new(:outvar => '@_out_buf') do
-           '<%= tag(:li, "Hello") %>'
+          '<%= tag(:div) %>'
         end.render(self)
+        output.should have_css 'div'
       end
-      it { output.should have_css 'li', :text => "Hello" }
     end
 
-    describe 'shallow blocks' do
-      before do
-        @output = Tilt['erb'].new(:outvar => '@_out_buf') do 
-          <<-ERB
-            <% tag(:li) do %>
-              <%= tag(:a, 'Hello') %>
+    describe 'block passing' do
+      describe 'shallow' do
+        before do
+          @output = Tilt['erb'].new(:outvar => '@_out_buf') do 
+            <<-ERB
+            <% tag(:div) do %>
+              <% tag(:a) do %>
+                Hello
+              <% end %>
             <% end %>
-          ERB
-        end.render(self)
+            ERB
+          end.render(self)
+        end
+        it { output.should have_css 'div' }
+        it { output.should have_css 'div > a', :text => 'Hello' }
       end
-      it { output.should have_css 'li' }
-      it { output.should have_css 'li > a', :text => 'Hello' }
-    end
 
-    describe 'deeper blocks' do
-      before do
+      it 'should pass widget to block' do
         @output = Tilt['erb'].new(:outvar => '@_out_buf') do 
           <<-ERB
-            <% tag(:li) do %>
-              <% tag(:a, 'Hello') do %>
-                <%= tag(:img) %>
+            <% tag(:div) do |div| %>
+              <% div.should be_a Tiny::Widget %>
+              <% tag(:a) do |a| %>
+                <% a.tag_name.should == :a %>
               <% end %>
             <% end %>
           ERB
         end.render(self)
       end
-      it { output.should have_css 'li' }
-      it { output.should have_css 'li > a' }
-      it { output.should have_css 'li > a > img' }
+
+      describe 'nested' do
+        before do
+          @output = Tilt['erb'].new(:outvar => '@_out_buf') do 
+            <<-ERB
+            <% tag(:ul) do %>
+              <% tag(:li) do %>
+                <% tag(:a) do %>
+                  Hey
+                  <% tag(:span) do %>
+                    Ho
+                  <% end %>
+                <% end %>
+              <% end %>
+            <% end %>
+            ERB
+          end.render(self)
+        end
+        it { output.should have_css 'ul' }
+        it { output.should have_css 'ul > li' }
+        it { output.should have_css 'ul > li > a' }
+        it { output.should have_css 'ul > li > a', :text => 'Hey' }
+        it { output.should have_css 'ul > li > a > span', :text => 'Ho' }
+      end
     end
+
   end
 end

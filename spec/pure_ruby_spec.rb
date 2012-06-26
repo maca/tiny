@@ -12,7 +12,7 @@ describe 'markup helpers' do
     describe 'basic' do
       describe 'attributes and content' do
         before do
-          @output = tag(:li, "Hello", :class => 'item', :id => 'hello') 
+          @output = tag(:li, :class => 'item', :id => 'hello') { text 'Hello' }
         end
         it { output.should have_css 'li' }
         it { output.should have_css 'li', :text => "Hello" }
@@ -20,23 +20,24 @@ describe 'markup helpers' do
         it { output.should have_css 'li#hello' }
       end
 
-      describe 'blank attribute values' do
-        before do
-          @output = tag(:li, "Hello", :class => [], :id => nil) 
-        end
-        it { @output.should == '<li>Hello</li>'}
+      it 'should not use blank attribute values' do
+        output = tag(:li, :class => [], :id => nil) { text 'Hello' }
+        output.should == '<li>Hello</li>'
       end
 
-      describe 'true attribute' do
-        before do
-          @output = tag(:li, "Hello", 'data-something' => true) 
-        end
-        it { @output.should == '<li data-something>Hello</li>'}
+      it 'should not emit value for an atribute value of true' do
+        output = tag(:li, 'data-something' => true) { text 'Hello' }
+        output.should == '<li data-something>Hello</li>'
+      end
+
+      it 'should not allow passing text without #text' do
+        output = tag(:li) { 'Hello' }
+        output.should == '<li></li>'
       end
 
       describe 'multiple classes' do
         before do
-          @output = tag(:li, "Hello", :class => %w(item in-stock)) 
+          @output = tag(:li, :class => %w(item in-stock)) { text 'Hello' }
         end
         it { output.should have_css 'li.item' }
         it { output.should have_css 'li.in-stock' }
@@ -45,7 +46,7 @@ describe 'markup helpers' do
 
     describe 'shallow blocks' do
       before do
-        @output = tag(:li) { tag(:a, 'Hello') }
+        @output = tag(:li) { tag(:a) { text 'Hello' } }
       end
       it { output.should have_css 'li' }
       it { output.should have_css 'li > a', :text => 'Hello' }
@@ -53,10 +54,16 @@ describe 'markup helpers' do
 
     describe 'deeper blocks' do
       before do
-        @output = tag(:li) { tag(:a, 'Hello') { tag(:img) } }
+        @output = tag(:li) do 
+          tag(:a) do
+            text 'Hello'
+            tag(:img)
+          end
+        end
       end
       it { output.should have_css 'li' }
       it { output.should have_css 'li > a' }
+      it { output.should have_css 'li > a', :text => 'Hello' }
       it { output.should have_css 'li > a > img' }
     end
 
@@ -64,9 +71,9 @@ describe 'markup helpers' do
       describe 'concatenation' do
         before do
           @output = tag(:ul) do
-            tag(:li, 'One')
-            tag(:li, 'Two')
-            tag(:li, 'Three')
+            tag(:li) { text 'One' }
+            tag(:li) { text 'Two' }
+            tag(:li) { text 'Three' }
           end
         end
 
@@ -80,9 +87,9 @@ describe 'markup helpers' do
       describe 'nested' do
         before do
           @output = tag(:ul) do
-            tag(:li) { tag(:a, 'One') }
-            tag(:li) { tag(:a, 'Two') }
-            tag(:li) { tag(:a, 'Three') }
+            tag(:li) { tag(:a) { text 'One' } }
+            tag(:li) { tag(:a) { text 'Two' } }
+            tag(:li) { tag(:a) { text 'Three' } }
           end
         end
 
@@ -105,11 +112,6 @@ describe 'markup helpers' do
       end
 
       describe 'text' do
-        it 'should output text' do
-          @output = tag(:li){ text 'hi' }
-          output.should have_css 'li', :text => 'hi'
-        end
-
         it 'should escape text' do
           @output = tag(:li){ text '&<>' }
           @output.should =~ /&amp;&lt;&gt;/
