@@ -54,7 +54,11 @@ module Tiny
     end
 
     def render
-      %{<#{tag_name}#{tag_attributes}>#{render_content}</#{tag_name}>}
+      content = render_content
+      content.gsub!(/^(?!\s*$)/, "  ")
+      content.gsub!(/\A(?!\s*$)|(?<!^)\z/, "\r\n") # No 1.8.7 compatibility
+      
+      %{<#{tag_name}#{tag_attributes}>#{content}</#{tag_name}>}
     end
 
     def tag *args, &block
@@ -62,17 +66,17 @@ module Tiny
     end
 
     def text content
-      @buffer << Rack::Utils.escape_html(content.to_s)
+      @buffer << Rack::Utils.escape_html(content.to_s) + "\r\n"
     end
 
     def text! content
-      @buffer << content.to_s
+      @buffer << content.to_s + "\r\n"
     end
 
     private
     def render_content
       instance_exec(self, &@block) if @block
-      @buffer
+      @buffer.strip
     end
 
     def method_missing *args, &block

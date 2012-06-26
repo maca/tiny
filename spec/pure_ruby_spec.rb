@@ -22,13 +22,14 @@ describe 'markup helpers' do
 
       it 'should not use blank attribute values' do
         output = tag(:li, :class => [], :id => nil) { text 'Hello' }
-        output.should == '<li>Hello</li>'
+        output.should =~ /<li>/
       end
 
       it 'should not emit value for an atribute value of true' do
-        output = tag(:li, 'data-something' => true) { text 'Hello' }
-        output.should == '<li data-something>Hello</li>'
+        output = tag(:li, 'data-something' => true)
+        output.should =~ /<li data-something>/
       end
+
 
       it 'should not allow passing text without #text' do
         output = tag(:li) { 'Hello' }
@@ -44,27 +45,29 @@ describe 'markup helpers' do
       end
     end
 
-    describe 'shallow blocks' do
-      before do
-        @output = tag(:li) { tag(:a) { text 'Hello' } }
+    describe 'blocks' do
+      describe 'shallow blocks' do
+        before do
+          @output = tag(:li) { tag(:a) { text 'Hello' } }
+        end
+        it { output.should have_css 'li' }
+        it { output.should have_css 'li > a', :text => 'Hello' }
       end
-      it { output.should have_css 'li' }
-      it { output.should have_css 'li > a', :text => 'Hello' }
-    end
 
-    describe 'deeper blocks' do
-      before do
-        @output = tag(:li) do 
-          tag(:a) do
-            text 'Hello'
-            tag(:img)
+      describe 'deeper blocks' do
+        before do
+          @output = tag(:li) do 
+            tag(:a) do
+              text 'Hello'
+              tag(:img)
+            end
           end
         end
+        it { output.should have_css 'li' }
+        it { output.should have_css 'li > a' }
+        it { output.should have_css 'li > a', :text => 'Hello' }
+        it { output.should have_css 'li > a > img' }
       end
-      it { output.should have_css 'li' }
-      it { output.should have_css 'li > a' }
-      it { output.should have_css 'li > a', :text => 'Hello' }
-      it { output.should have_css 'li > a > img' }
     end
 
     describe 'buffering' do
@@ -121,6 +124,25 @@ describe 'markup helpers' do
           @output = tag(:li){ text! '&<>' }
           @output.should =~ /&<>/
         end
+      end
+    end
+
+    describe 'formatting' do
+      it 'shuould concat with newlines and indentation' do
+        output = tag(:ul) do
+          tag (:li)
+        end
+        output.should == "<ul>\r\n  <li></li>\r\n</ul>"
+      end
+
+      it 'shuould concat with newlines after text' do
+        output = tag(:ul) do
+          tag (:li) do
+            text 'Hi'
+            text! 'Hi'
+          end
+        end
+        output.should == "<ul>\r\n  <li>\r\n    Hi\r\n    Hi\r\n  </li>\r\n</ul>"
       end
     end
   end

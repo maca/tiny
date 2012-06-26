@@ -42,7 +42,7 @@ describe 'markup helpers' do
       end
 
       it 'should pass widget to block' do
-        @output = Tilt['haml'].new do 
+        Tilt['haml'].new do 
           <<-HAML
 = tag(:div) do |div|
   - div.should be_a Tiny::Widget 
