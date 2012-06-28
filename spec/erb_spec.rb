@@ -31,7 +31,8 @@ describe 'markup helpers' do
           ERB
         end.render(self)
       end
-      it { output.should have_css 'div' }
+      it { output.should have_css 'div',     :count => 1 }
+      it { output.should have_css 'a',       :count => 1 }
       it { output.should have_css 'div > a', :text => 'Hello' }
     end
 
@@ -55,9 +56,25 @@ describe 'markup helpers' do
             <% tag(:ul) do %>
               <% tag(:li) do %>
                 <% tag(:a) do %>
-                  Hey
+                  A
                   <% tag(:span) do %>
-                    Ho
+                    1
+                  <% end %>
+                <% end %>
+              <% end %>
+              <% tag(:li) do %>
+                <% tag(:a) do %>
+                  B
+                  <% tag(:span) do %>
+                    2
+                  <% end %>
+                <% end %>
+              <% end %>
+              <% tag(:li) do %>
+                <% tag(:a) do %>
+                  C
+                  <% tag(:span) do %>
+                    3
                   <% end %>
                 <% end %>
               <% end %>
@@ -65,11 +82,19 @@ describe 'markup helpers' do
           ERB
         end.render(self)
       end
-      it { output.should have_css 'ul' }
+      
+      it { output.should have_css 'ul',    :count => 1 }
+      it { output.should have_css 'li',    :count => 3 }
+      it { output.should have_css 'a',     :count => 3 }
+      it { output.should have_css 'span',  :count => 3 }
       it { output.should have_css 'ul > li' }
       it { output.should have_css 'ul > li > a' }
-      it { output.should have_css 'ul > li > a', :text => 'Hey' }
-      it { output.should have_css 'ul > li > a > span', :text => 'Ho' }
+      it { output.should have_css 'ul > li > a', :text => 'A' }
+      it { output.should have_css 'ul > li > a > span', :text => '1' }
+      it { output.should have_css 'ul > li > a', :text => 'B' }
+      it { output.should have_css 'ul > li > a > span', :text => '2' }
+      it { output.should have_css 'ul > li > a', :text => 'C' }
+      it { output.should have_css 'ul > li > a > span', :text => '3' }
     end
   end
   

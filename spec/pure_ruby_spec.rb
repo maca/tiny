@@ -14,7 +14,7 @@ describe 'markup helpers' do
         before do
           @output = tag(:li, :class => 'item', :id => 'hello') { text 'Hello' }
         end
-        it { output.should have_css 'li' }
+        it { output.should have_css 'li', :count => 1 }
         it { output.should have_css 'li', :text => "Hello" }
         it { output.should have_css 'li.item' }
         it { output.should have_css 'li#hello' }
@@ -48,25 +48,28 @@ describe 'markup helpers' do
     describe 'blocks' do
       describe 'shallow blocks' do
         before do
-          @output = tag(:li) { tag(:a) { text 'Hello' } }
+          @output = tag(:div) { tag(:a) { text 'Hello' } }
         end
-        it { output.should have_css 'li' }
-        it { output.should have_css 'li > a', :text => 'Hello' }
+        it { output.should have_css 'div', :count => 1 }
+        it { output.should have_css 'a',   :count => 1 }
+        it { output.should have_css 'div > a', :text => 'Hello' }
       end
 
       describe 'deeper blocks' do
         before do
-          @output = tag(:li) do 
+          @output = tag(:div) do 
             tag(:a) do
               text 'Hello'
               tag(:img)
             end
           end
         end
-        it { output.should have_css 'li' }
-        it { output.should have_css 'li > a' }
-        it { output.should have_css 'li > a', :text => 'Hello' }
-        it { output.should have_css 'li > a > img' }
+        it { output.should have_css 'div',     :count => 1 }
+        it { output.should have_css 'a',       :count => 1 }
+        it { output.should have_css 'div > a' }
+        it { output.should have_css 'div > a', :text => 'Hello' }
+        it { output.should have_css 'img',     :count => 1 }
+        it { output.should have_css 'div > a > img' }
       end
     end
 
@@ -80,8 +83,9 @@ describe 'markup helpers' do
           end
         end
 
-        it { output.should have_css 'ul' }
-        it { output.should have_css 'ul > li' }
+        it { output.should have_css 'ul',      :count => 1 }
+        it { output.should have_css 'li',      :count => 3 }
+        it { output.should have_css 'ul > li', :count => 3 }
         it { output.should have_css 'ul > li', :text => 'One' }
         it { output.should have_css 'ul > li', :text => 'Two' }
         it { output.should have_css 'ul > li', :text => 'Three' }
@@ -96,8 +100,10 @@ describe 'markup helpers' do
           end
         end
 
-        it { output.should have_css 'ul' }
-        it { output.should have_css 'ul > li' }
+        it { output.should have_css 'ul',          :count => 1 }
+        it { output.should have_css 'li',          :count => 3 }
+        it { output.should have_css 'ul > li',     :count => 3 }
+        it { output.should have_css 'a',           :count => 3 }
         it { output.should have_css 'ul > li > a', :text => 'One' }
         it { output.should have_css 'ul > li > a', :text => 'Two' }
         it { output.should have_css 'ul > li > a', :text => 'Three' }
