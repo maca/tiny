@@ -3,7 +3,7 @@ require 'spec_helper'
 require 'erubis'
 
 describe 'markup helpers' do
-  include Tiny::Helper
+  include Tiny::Helpers
 
   let(:output) do
     Capybara::Node::Simple.new(@output)
@@ -12,7 +12,6 @@ describe 'markup helpers' do
   describe 'tag' do
     it 'should emit tag' do
       @output = Tilt['erb'].new(:outvar => '@_out_buf') { '<%= tag(:div) %>' }.render(self)
-      puts @output
       output.should have_css 'div', :count => 1
     end
   end
@@ -35,11 +34,11 @@ describe 'markup helpers' do
       it { output.should have_css 'div > a', :text => 'Hello' }
     end
 
-    it 'should pass widget to block' do
+    it 'should pass tag to block' do
       @output = Tilt['erb'].new(:outvar => '@_out_buf') do 
         <<-ERB
           <% tag(:div) do |div| %>
-            <% div.should be_a Tiny::Widget %>
+            <% div.should be_a Tiny::Tag %>
             <% tag(:a) do |a| %>
               <% a.tag_name.should == :a %>
             <% end %>
@@ -60,12 +59,12 @@ describe 'markup helpers' do
     it 'shuould concat with newlines and indentation' do
       output = Tilt['erb'].new(:outvar => '@_out_buf') do 
         <<-ERB
-          <% tag(:ul) do %>
-            <%= tag(:li) %>
-          <% end %>
+<% tag(:ul) do %>
+  <%= tag(:li) %>
+<% end %>
         ERB
       end.render(self)
-      output.should == "<ul>\n  <li></li>\n</ul>"
+      output.should == "<ul>\n  <li />\n</ul>"
     end
   end
 

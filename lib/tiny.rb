@@ -5,7 +5,11 @@ require 'tiny/version'
 require 'ext/tilt/template'
 
 module Tiny
-  module Helper
+  module Helpers
+    def html_tag name, attrs = {}, &block
+      Tag.new(name, attrs).render(self, &block)
+    end
+
     def text content
       output_buffer << Rack::Utils.escape_html(content.to_s) + "\n"
     end
@@ -14,56 +18,69 @@ module Tiny
       output_buffer << content.to_s + "\n"
     end
 
-    def capture_erb *args, &block
-      buffer = output_buffer.dup
-      output_buffer.clear and yield(*args)
-      return output_buffer.dup
-    ensure
-      output_buffer.replace buffer
-    end
-
-    class << self
-      def included base
-        if base == ActionView::Base
-          base.send :include, Rails
-        else
-          base.send :include, Generic
-        end
+    def self.included base
+      if defined?(ActionView) && base == ActionView::Base 
+        base.send :include, Rails
+      else
+        base.send :include, Generic
       end
     end
 
     module Rails
-      def html_tag name, attrs = {}, &block
-        output = Widget.new(name, attrs) do |widget|
-          text! capture_erb(widget, &block) if block_given?
-        end.render(self)
-        concat output.html_safe
-        return nil
+      def tiny_capture *args, &block
+        capture *args, &block
       end
 
-      def erb_buffer
-        output_buffer
+      def erb_template?
+        true
+      end
+
+      def haml_template?
       end
     end
 
     module Generic
-      def html_tag name, attrs = {}, &block
-        Widget.new(name, attrs).render(self, &block)
+      attr_reader :tilt_context
+
+      def tag name, attrs = {}, &block
+        html_tag name, attrs, &block
       end
 
-      alias tag html_tag
-
       def output_buffer
-        if outvar = @__tilt_context.instance_variable_get(:@outvar)
+        if outvar = tilt_context.instance_variable_get(:@outvar)
           instance_variable_get outvar
         else
           @output_buffer ||= ''
         end
       end
+
+      def tiny_capture *args, &block
+        if haml_template? 
+          capture_haml *args, &block
+        else
+          with_blank_buffer *args, &block
+        end
+      end
+
+      def with_blank_buffer *args, &block
+        buffer = output_buffer.dup
+        output_buffer.clear and yield(*args)
+        return output_buffer.dup
+      ensure
+        output_buffer.replace buffer
+      end
+
+      def erb_template?
+        tilt_context.is_a?(Tilt::ERBTemplate)
+      end
+
+      def haml_template?
+        tilt_context.is_a?(Tilt::HamlTemplate)
+      end
     end
   end
 
-  class Widget
+  class Tag
     attr_reader :tag_name, :attrs
 
     def initialize tag_name, attrs = {}, &block
@@ -80,25 +97,27 @@ module Tiny
     end
 
     def render scope, &block
-      scope   = scope
-      content = scope.capture_erb(&block) if block_given?
-      
+      content = scope.tiny_capture(self, &block) if block_given?
+
       if content
-        content.gsub!(/^(?!\s*$)/, "  ")
-        content.gsub!(/\A(?!$)|(?<!^)\z/, "\n") 
+        content.gsub!(/^(?!\s*$)/, "  ") unless scope.erb_template?
+        content.gsub!(/\A(?!$)|(?<!^|\n)\z/, "\n") 
         tag = %{<#{tag_name}#{tag_attributes}>#{content}</#{tag_name}>}
       else
         tag = %{<#{tag_name}#{tag_attributes} />}
       end
 
+      tag = tag.html_safe if tag.respond_to?(:html_safe)
+      return tag if scope.haml_template?
       scope.output_buffer << tag
+      scope.output_buffer unless scope.erb_template?
     end
   end
 
   def self.registered app
-    app.helpers Helper
+    app.helpers Helpers
   end
 
   Sinatra.register self if defined?(Sinatra)
-  ActionView::Base.send :include, Helper if defined?(Rails)
+  ActionView::Base.send :include, Helpers if defined?(ActionView)
 end

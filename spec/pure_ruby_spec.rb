@@ -2,7 +2,7 @@
 require 'spec_helper'
 
 describe 'markup helpers' do
-  include Tiny::Helper
+  include Tiny::Helpers
 
   let(:output) do
     Capybara::Node::Simple.new(@output)
@@ -49,7 +49,6 @@ describe 'markup helpers' do
       describe 'shallow blocks' do
         before do
           @output = tag(:div) { tag(:a) { text 'Hello' } }
-          # puts @output.inspect
         end
         it { output.should have_css 'div', :count => 1 }
         it { output.should have_css 'a',   :count => 1 }
@@ -64,7 +63,6 @@ describe 'markup helpers' do
               tag(:img)
             end
           end
-          puts @output.inspect
         end
         it { output.should have_css 'div',     :count => 1 }
         it { output.should have_css 'a',       :count => 1 }

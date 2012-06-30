@@ -2,7 +2,7 @@
 require 'spec_helper'
 
 describe 'markup helpers' do
-  include Tiny::Helper
+  include Tiny::Helpers
 
   let(:output) do
     Capybara::Node::Simple.new(@output)
@@ -41,11 +41,11 @@ describe 'markup helpers' do
       it { output.should have_css 'div > a', :text => 'Hello' }
     end
 
-    it 'should pass widget to block' do
+    it 'should pass tag to block' do
       Tilt['haml'].new do 
         <<-HAML
 = tag(:div) do |div|
-  - div.should be_a Tiny::Widget 
+  - div.should be_a Tiny::Tag 
   = tag(:a) do |a|
     - a.tag_name.should == :a
         HAML
@@ -62,14 +62,14 @@ describe 'markup helpers' do
   end
 
   describe 'formatting' do
-    it 'shuould concat with newlines and indentation' do
+    it 'should concat with newlines and indentation' do
       output = Tilt['haml'].new do 
         <<-HAML
 = tag(:ul) do
   = tag(:li)
         HAML
       end.render(self)
-      output.should == "<ul>\n  <li></li>\n</ul>\n"
+      output.should == "<ul>\n  <li />\n</ul>\n"
     end
 
     it 'shuould concat with newlines after text' do
