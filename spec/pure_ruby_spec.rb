@@ -2,7 +2,7 @@
 require 'spec_helper'
 
 describe 'markup helpers' do
-  include Tiny::Helpers
+  include Tiny::Helper
 
   let(:output) do
     Capybara::Node::Simple.new(@output)

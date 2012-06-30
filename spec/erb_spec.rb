@@ -3,7 +3,7 @@ require 'spec_helper'
 require 'erubis'
 
 describe 'markup helpers' do
-  include Tiny::Helpers
+  include Tiny::Helper
 
   let(:output) do
     Capybara::Node::Simple.new(@output)
@@ -11,9 +11,7 @@ describe 'markup helpers' do
 
   describe 'tag' do
     it 'should emit tag' do
-      @output = Tilt['erb'].new(:outvar => '@_out_buf') do
-        '<%= tag(:div) %>'
-      end.render(self)
+      @output = Tilt['erb'].new(:outvar => '@_out_buf') { '<%= tag(:div) %>' }.render(self)
       output.should have_css 'div', :count => 1
     end
   end
@@ -39,62 +37,21 @@ describe 'markup helpers' do
     it 'should pass widget to block' do
       @output = Tilt['erb'].new(:outvar => '@_out_buf') do 
         <<-ERB
-            <% tag(:div) do |div| %>
-              <% div.should be_a Tiny::Widget %>
-              <% tag(:a) do |a| %>
-                <% a.tag_name.should == :a %>
-              <% end %>
+          <% tag(:div) do |div| %>
+            <% div.should be_a Tiny::Widget %>
+            <% tag(:a) do |a| %>
+              <% a.tag_name.should == :a %>
             <% end %>
+          <% end %>
         ERB
       end.render(self)
     end
 
     describe 'nested' do
       before do
-        @output = Tilt['erb'].new(:outvar => '@_out_buf') do 
-          <<-ERB
-            <% tag(:ul) do %>
-              <% tag(:li) do %>
-                <% tag(:a) do %>
-                  A
-                  <% tag(:span) do %>
-                    1
-                  <% end %>
-                <% end %>
-              <% end %>
-              <% tag(:li) do %>
-                <% tag(:a) do %>
-                  B
-                  <% tag(:span) do %>
-                    2
-                  <% end %>
-                <% end %>
-              <% end %>
-              <% tag(:li) do %>
-                <% tag(:a) do %>
-                  C
-                  <% tag(:span) do %>
-                    3
-                  <% end %>
-                <% end %>
-              <% end %>
-            <% end %>
-          ERB
-        end.render(self)
+        @output = Renderer.new('erb_list.erb').render
       end
-      
-      it { output.should have_css 'ul',    :count => 1 }
-      it { output.should have_css 'li',    :count => 3 }
-      it { output.should have_css 'a',     :count => 3 }
-      it { output.should have_css 'span',  :count => 3 }
-      it { output.should have_css 'ul > li' }
-      it { output.should have_css 'ul > li > a' }
-      it { output.should have_css 'ul > li > a', :text => 'A' }
-      it { output.should have_css 'ul > li > a > span', :text => '1' }
-      it { output.should have_css 'ul > li > a', :text => 'B' }
-      it { output.should have_css 'ul > li > a > span', :text => '2' }
-      it { output.should have_css 'ul > li > a', :text => 'C' }
-      it { output.should have_css 'ul > li > a > span', :text => '3' }
+      it_should_behave_like 'it renders my list'
     end
   end
   
@@ -102,12 +59,19 @@ describe 'markup helpers' do
     it 'shuould concat with newlines and indentation' do
       output = Tilt['erb'].new(:outvar => '@_out_buf') do 
         <<-ERB
-<% tag(:ul) do %>
-  <%= tag(:li) %>
-<% end %>
+          <% tag(:ul) do %>
+            <%= tag(:li) %>
+          <% end %>
         ERB
       end.render(self)
       output.should == "<ul>\n  <li></li>\n</ul>"
     end
+  end
+
+  describe 'with helpers' do
+    before do
+      @output = Renderer.new('erb_list_with_helpers.erb').render
+    end
+    it_should_behave_like 'it renders my list'
   end
 end

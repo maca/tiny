@@ -19,7 +19,6 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
 
   s.add_runtime_dependency 'tilt'
-  s.add_runtime_dependency 'rack'
 
   s.add_development_dependency 'rake'
   s.add_development_dependency 'rspec'
@@ -28,4 +27,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'haml'
   s.add_development_dependency 'tilt'
   s.add_development_dependency 'sinatra'
+  s.add_development_dependency 'rails'
 end

@@ -1,48 +1,96 @@
-require "tilt"
-require 'yaml'
-require "rack/utils"
-
-require "tiny/version"
-require "ext/tilt/template"
+require 'tilt'
+require 'haml'
+require 'rack/utils'
+require 'tiny/version'
+require 'ext/tilt/template'
 
 module Tiny
-  module Helpers
-    def tag name, attrs = {}, &block
-      case @__tilt_context
-      when Tilt::ErubisTemplate, Tilt::ERBTemplate
-        erb_buffer << Widget.new(self, name, attrs) do |widget|
-          text! capture_erb(widget, &block) if block_given?
-        end.render 
-        return nil
-      when Tilt::HamlTemplate
-        Widget.new(self, name, attrs) do |widget|
-          text! capture_haml(widget, &block) if block_given?
-        end.render 
-      when nil
-        Widget.new(self, name, attrs, &block).render 
-      end
+  module TextHelpers
+    def text content
+      output_buffer << Rack::Utils.escape_html(content.to_s) + "\n"
     end
 
-    def capture_erb *args
-      buffer = erb_buffer.dup
-      erb_buffer.clear and yield(*args)
-      return erb_buffer.dup
-    ensure
-      erb_buffer.replace buffer
-    end
-
-    def erb_buffer
-      outvar = @__tilt_context.instance_variable_get(:@outvar)
-      instance_variable_get outvar
+    def text! content
+      output_buffer << content.to_s + "\n"
     end
   end
 
-  class Widget
-    attr_reader :tag_name, :attrs
+  module Helper
+    include TextHelpers
 
-    def initialize scope, tag_name, attrs = {}, &block
-      @scope, @tag_name, @attrs, @block = scope, tag_name, attrs, block
-      @buffer = ''
+    def capture_erb *args, &block
+      buffer = output_buffer.dup
+      output_buffer.clear and yield(*args)
+      return output_buffer.dup
+    ensure
+      output_buffer.replace buffer
+    end
+
+    class << self
+      def included base
+        if base == ActionView::Base
+          base.send :include, Rails
+        else
+          base.send :include, Generic
+        end
+      end
+    end
+
+    module Rails
+      def html_tag name, attrs = {}, &block
+          puts capture('hi') { 'lo' }
+        output = Widget.new(name, attrs) do |widget|
+          text! capture_erb(widget, &block) if block_given?
+        end.render(self)
+        concat output.html_safe
+        return nil
+      end
+
+      def erb_buffer
+        output_buffer
+      end
+    end
+
+    module Generic
+      def html_tag name, attrs = {}, &block
+        case @__tilt_context
+        when Tilt::ErubisTemplate, Tilt::ERBTemplate
+
+
+          output_buffer << Widget.new(name, attrs) do |widget|
+            text! capture_erb(widget, &block) if block_given?
+          end.render(self)
+          return nil
+
+
+
+        when Tilt::HamlTemplate
+          Widget.new(name, attrs) do |widget|
+            text! capture_haml(widget, &block) if block_given?
+          end.render(self)
+        when nil
+          Widget.new(name, attrs, &block).render(self)
+        end
+      end
+
+      alias tag html_tag
+
+      def output_buffer
+        outvar = @__tilt_context.instance_variable_get(:@outvar)
+        instance_variable_get outvar
+      end
+    end
+  end
+
+
+  class Widget
+    include TextHelpers
+
+    attr_reader :tag_name, :attrs, :output_buffer
+
+    def initialize tag_name, attrs = {}, &block
+      @tag_name, @attrs, @block = tag_name, attrs, block
+      @output_buffer = ''
     end
 
     def tag_attributes
@@ -54,25 +102,17 @@ module Tiny
       tag_attrs.empty?? '' : " #{tag_attrs}"
     end
 
-    def render
+    def render scope
+      @scope  = scope
       content = render_content
+
       content.gsub!(/^(?!\s*$)/, "  ")
-      # Following line breaks 1.8.7 compatibility
       content.gsub!(/\A(?!$)|(?<!^)\z/, "\n") 
-      
       %{<#{tag_name}#{tag_attributes}>#{content}</#{tag_name}>}
     end
 
     def tag *args, &block
-      @buffer << Widget.new(@scope, *args, &block).render 
-    end
-
-    def text content
-      @buffer << Rack::Utils.escape_html(content.to_s) + "\n"
-    end
-
-    def text! content
-      @buffer << content.to_s + "\n"
+      output_buffer << Widget.new(*args, &block).render(@scope)
     end
 
     def respond_to? method
@@ -81,9 +121,8 @@ module Tiny
 
     private
     def render_content
-      # Following line breaks 1.8.7 compatibility
       instance_exec(self, &@block) if @block
-      @buffer.strip
+      output_buffer.strip
     end
 
     def method_missing *args, &block
@@ -92,8 +131,9 @@ module Tiny
   end
 
   def self.registered app
-    app.helpers Helpers
+    app.helpers Helper
   end
 
-  Sinatra.register self if const_defined? :Sinatra
+  Sinatra.register self if defined?(Sinatra)
+  ActionView::Base.send :include, Helper if defined?(Rails)
 end

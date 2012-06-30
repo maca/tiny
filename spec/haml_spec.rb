@@ -2,7 +2,7 @@
 require 'spec_helper'
 
 describe 'markup helpers' do
-  include Tiny::Helpers
+  include Tiny::Helper
 
   let(:output) do
     Capybara::Node::Simple.new(@output)
@@ -54,39 +54,10 @@ describe 'markup helpers' do
 
     describe 'nested' do
       before do
-        @output = Tilt['haml'].new do 
-          <<-HAML
-= tag(:ul) do
-  = tag(:li) do
-    = tag(:a) do
-      A
-      = tag(:span) do
-        1
-  = tag(:li) do
-    = tag(:a) do
-      B
-      = tag(:span) do
-        2
-  = tag(:li) do
-    = tag(:a) do
-      C
-      = tag(:span) do
-        3
-          HAML
-        end.render(self)
+        @output = Tilt.new("#{FIXTURES}/haml_list.haml").render(self)
       end
-      it { output.should have_css 'ul',    :count => 1 }
-      it { output.should have_css 'li',    :count => 3 }
-      it { output.should have_css 'a',     :count => 3 }
-      it { output.should have_css 'span',  :count => 3 }
-      it { output.should have_css 'ul > li' }
-      it { output.should have_css 'ul > li > a' }
-      it { output.should have_css 'ul > li > a', :text => 'A' }
-      it { output.should have_css 'ul > li > a > span', :text => '1' }
-      it { output.should have_css 'ul > li > a', :text => 'B' }
-      it { output.should have_css 'ul > li > a > span', :text => '2' }
-      it { output.should have_css 'ul > li > a', :text => 'C' }
-      it { output.should have_css 'ul > li > a > span', :text => '3' }
+
+      it_should_behave_like 'it renders my list'
     end
   end
 
