@@ -12,6 +12,7 @@ describe 'markup helpers' do
   describe 'tag' do
     it 'should emit tag' do
       @output = Tilt['erb'].new(:outvar => '@_out_buf') { '<%= tag(:div) %>' }.render(self)
+      puts @output
       output.should have_css 'div', :count => 1
     end
   end

@@ -5,7 +5,7 @@ require 'tiny/version'
 require 'ext/tilt/template'
 
 module Tiny
-  module TextHelpers
+  module Helper
     def text content
       output_buffer << Rack::Utils.escape_html(content.to_s) + "\n"
     end
@@ -13,10 +13,6 @@ module Tiny
     def text! content
       output_buffer << content.to_s + "\n"
     end
-  end
-
-  module Helper
-    include TextHelpers
 
     def capture_erb *args, &block
       buffer = output_buffer.dup
@@ -38,7 +34,6 @@ module Tiny
 
     module Rails
       def html_tag name, attrs = {}, &block
-          puts capture('hi') { 'lo' }
         output = Widget.new(name, attrs) do |widget|
           text! capture_erb(widget, &block) if block_given?
         end.render(self)
@@ -53,44 +48,26 @@ module Tiny
 
     module Generic
       def html_tag name, attrs = {}, &block
-        case @__tilt_context
-        when Tilt::ErubisTemplate, Tilt::ERBTemplate
-
-
-          output_buffer << Widget.new(name, attrs) do |widget|
-            text! capture_erb(widget, &block) if block_given?
-          end.render(self)
-          return nil
-
-
-
-        when Tilt::HamlTemplate
-          Widget.new(name, attrs) do |widget|
-            text! capture_haml(widget, &block) if block_given?
-          end.render(self)
-        when nil
-          Widget.new(name, attrs, &block).render(self)
-        end
+        Widget.new(name, attrs).render(self, &block)
       end
 
       alias tag html_tag
 
       def output_buffer
-        outvar = @__tilt_context.instance_variable_get(:@outvar)
-        instance_variable_get outvar
+        if outvar = @__tilt_context.instance_variable_get(:@outvar)
+          instance_variable_get outvar
+        else
+          @output_buffer ||= ''
+        end
       end
     end
   end
 
-
   class Widget
-    include TextHelpers
-
-    attr_reader :tag_name, :attrs, :output_buffer
+    attr_reader :tag_name, :attrs
 
     def initialize tag_name, attrs = {}, &block
       @tag_name, @attrs, @block = tag_name, attrs, block
-      @output_buffer = ''
     end
 
     def tag_attributes
@@ -102,31 +79,19 @@ module Tiny
       tag_attrs.empty?? '' : " #{tag_attrs}"
     end
 
-    def render scope
-      @scope  = scope
-      content = render_content
+    def render scope, &block
+      scope   = scope
+      content = scope.capture_erb(&block) if block_given?
+      
+      if content
+        content.gsub!(/^(?!\s*$)/, "  ")
+        content.gsub!(/\A(?!$)|(?<!^)\z/, "\n") 
+        tag = %{<#{tag_name}#{tag_attributes}>#{content}</#{tag_name}>}
+      else
+        tag = %{<#{tag_name}#{tag_attributes} />}
+      end
 
-      content.gsub!(/^(?!\s*$)/, "  ")
-      content.gsub!(/\A(?!$)|(?<!^)\z/, "\n") 
-      %{<#{tag_name}#{tag_attributes}>#{content}</#{tag_name}>}
-    end
-
-    def tag *args, &block
-      output_buffer << Widget.new(*args, &block).render(@scope)
-    end
-
-    def respond_to? method
-      super or @scope.respond_to? method
-    end
-
-    private
-    def render_content
-      instance_exec(self, &@block) if @block
-      output_buffer.strip
-    end
-
-    def method_missing *args, &block
-      @scope.send *args, &block
+      scope.output_buffer << tag
     end
   end
 

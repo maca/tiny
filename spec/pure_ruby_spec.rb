@@ -27,7 +27,7 @@ describe 'markup helpers' do
 
       it 'should not emit value for an atribute value of true' do
         output = tag(:li, 'data-something' => true)
-        output.should =~ /<li data-something>/
+        output.should == "<li data-something />"
       end
 
 
@@ -49,6 +49,7 @@ describe 'markup helpers' do
       describe 'shallow blocks' do
         before do
           @output = tag(:div) { tag(:a) { text 'Hello' } }
+          # puts @output.inspect
         end
         it { output.should have_css 'div', :count => 1 }
         it { output.should have_css 'a',   :count => 1 }
@@ -63,6 +64,7 @@ describe 'markup helpers' do
               tag(:img)
             end
           end
+          puts @output.inspect
         end
         it { output.should have_css 'div',     :count => 1 }
         it { output.should have_css 'a',       :count => 1 }
@@ -109,23 +111,6 @@ describe 'markup helpers' do
         it { output.should have_css 'ul > li > a', :text => 'Three' }
       end
 
-      describe 'method forwarding' do
-        it 'should forward' do
-          @output = '<br>'
-          tag(:ul) do
-            tag(:li) { output.should_not be_nil }
-          end
-        end
-
-        it 'should not delegate respond to if responds to' do
-          tag(:div) { |tag| tag.should respond_to :text! }
-        end
-
-        it 'should delegate respond to if doesnt responds to' do
-          tag(:div) { |tag| tag.should respond_to :output }
-        end
-      end
-
       describe 'text' do
         it 'should escape text' do
           @output = tag(:li){ text '&<>' }
@@ -144,7 +129,7 @@ describe 'markup helpers' do
         output = tag(:ul) do
           tag (:li)
         end
-        output.should == "<ul>\n  <li></li>\n</ul>"
+        output.should == "<ul>\n  <li />\n</ul>"
       end
 
       it 'shuould concat with newlines after text' do
