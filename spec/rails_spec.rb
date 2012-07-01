@@ -25,4 +25,11 @@ describe 'Rails compatibility', :type => :request do
     end
     it_should_behave_like 'it renders my list'
   end
+
+  describe 'using Tiny from haml template' do
+    before do
+      visit '/haml'
+    end
+    it_should_behave_like 'it renders my list'
+  end
 end

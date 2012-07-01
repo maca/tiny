@@ -34,3 +34,5 @@ module RailsTestApp
     end
   end
 end
+
+require 'haml/template'
