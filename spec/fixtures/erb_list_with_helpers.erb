@@ -1,11 +1,3 @@
-<% list do %>
-  <li>
-    <%= item_content('A', 1) %>
-  </li>
-  <li>
-    <%= item_content('B', 2) %>
-  </li>
-  <li>
-    <%= item_content('C', 3) %>
-  </li>
+<% list([1, 2, 3]) do |element| %>
+  <%= item_content(element) %>
 <% end %>

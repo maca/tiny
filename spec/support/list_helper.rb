@@ -1,12 +1,16 @@
 module ListHelper
-  def list &block
-    html_tag :ul, &block
+  def list nums, &block
+    html_tag(:ul) do
+      nums.each(&block)
+    end
   end
 
-  def item_content a, b
-    html_tag(:a) do
-      text a
-      html_tag(:span) { text b }
+  def item_content num
+    html_tag(:li) do
+      html_tag(:a) do
+        text (num + 64).chr
+        html_tag(:span) { text num }
+      end
     end
   end
 end

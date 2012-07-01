@@ -21,16 +21,16 @@ module RailsTestApp
       include ListHelper
     end
 
-    def haml
-      render :template => "haml_list"
-    end
-
     def erb
       render :template => "erb_list"
     end
 
     def erb_helpers
       render :template => "erb_list_with_helpers"
+    end
+
+    def haml
+      render :template => "haml_list"
     end
   end
 end

@@ -46,14 +46,6 @@ module Tiny
         html_tag name, attrs, &block
       end
 
-      def output_buffer
-        if outvar = tilt_context.instance_variable_get(:@outvar)
-          instance_variable_get outvar
-        else
-          @output_buffer ||= ''
-        end
-      end
-
       def tiny_capture *args, &block
         if haml_template? 
           capture_haml *args, &block
@@ -76,6 +68,14 @@ module Tiny
 
       def haml_template?
         tilt_context.is_a?(Tilt::HamlTemplate)
+      end
+
+      def output_buffer
+        if outvar = tilt_context.instance_variable_get(:@outvar)
+          instance_variable_get outvar
+        else
+          @output_buffer ||= ''
+        end
       end
     end
   end
