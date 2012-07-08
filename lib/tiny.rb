@@ -5,17 +5,23 @@ require 'tiny/version'
 require 'ext/tilt/template'
 
 module Tiny
+  module BufferHelper
+    def local_buffer block
+      block and eval('defined?(__local_buffer) and __local_buffer', block.binding)
+    end
+  end
+
   module Helpers
     def html_tag name, attrs = {}, &block
       Tag.new(name, attrs).render(self, &block)
     end
 
     def text content
-      output_buffer << Rack::Utils.escape_html(content.to_s) + "\n"
+      tiny_buffer << Rack::Utils.escape_html(content.to_s) + "\n"
     end
 
     def text! content
-      output_buffer << content.to_s + "\n"
+      tiny_buffer << content.to_s + "\n"
     end
 
     def self.included base
@@ -31,7 +37,12 @@ module Tiny
         capture *args, &block
       end
 
+      def tiny_concat markup
+        concat(markup) and nil
+      end
+
       def erb_template?
+        puts self.inspect
         true
       end
 
@@ -39,8 +50,10 @@ module Tiny
       end
     end
 
+
     module Generic
       attr_reader :tilt_context
+      attr_accessor :tiny_buffer
 
       def tag name, attrs = {}, &block
         html_tag name, attrs, &block
@@ -54,12 +67,17 @@ module Tiny
         end
       end
 
+      def tiny_concat markup
+        # return markup if haml_template?
+        tiny_buffer << markup
+      end
+
       def with_blank_buffer *args, &block
-        buffer = output_buffer.dup
-        output_buffer.clear and yield(*args)
-        return output_buffer.dup
+        buffer = tiny_buffer.dup
+        tiny_buffer.clear and yield(*args)
+        return tiny_buffer.dup
       ensure
-        output_buffer.replace buffer
+        tiny_buffer.replace buffer
       end
 
       def erb_template?
@@ -69,22 +87,15 @@ module Tiny
       def haml_template?
         tilt_context.is_a?(Tilt::HamlTemplate)
       end
-
-      def output_buffer
-        if outvar = tilt_context.instance_variable_get(:@outvar)
-          instance_variable_get outvar
-        else
-          @output_buffer ||= ''
-        end
-      end
     end
   end
 
   class Tag
+    include BufferHelper
     attr_reader :tag_name, :attrs
 
-    def initialize tag_name, attrs = {}, &block
-      @tag_name, @attrs, @block = tag_name, attrs, block
+    def initialize tag_name, attrs = {}
+      @tag_name, @attrs = tag_name, attrs
     end
 
     def tag_attributes
@@ -97,20 +108,25 @@ module Tiny
     end
 
     def render scope, &block
-      content = scope.tiny_capture(self, &block) if block_given?
+      if scope.tiny_buffer
+        scope.tiny_concat render_tag(scope, &block)
+      else
+        scope.tiny_buffer = '' 
+        tag = scope.tiny_concat render_tag(scope, &block)
+        scope.tiny_buffer = nil
+        tag
+      end
+    end
 
+    def render_tag scope, &block
+      content = scope.tiny_capture(self, &block) if block_given?
       if content
         content.gsub!(/^(?!\s*$)/, "  ") unless scope.erb_template?
         content.gsub!(/\A(?!$)|(?<!^|\n)\z/, "\n") 
-        tag = %{<#{tag_name}#{tag_attributes}>#{content}</#{tag_name}>}
+        %{<#{tag_name}#{tag_attributes}>#{content}</#{tag_name}>}
       else
-        tag = %{<#{tag_name}#{tag_attributes} />}
+        %{<#{tag_name}#{tag_attributes} />}
       end
-
-      tag = tag.html_safe if tag.respond_to?(:html_safe)
-      return tag if scope.haml_template?
-      scope.output_buffer << tag
-      scope.output_buffer unless scope.erb_template?
     end
   end
 

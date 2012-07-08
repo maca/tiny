@@ -28,6 +28,7 @@ describe 'markup helpers' do
             <% end %>
           ERB
         end.render(self)
+        puts @output.inspect
       end
       it { output.should have_css 'div',     :count => 1 }
       it { output.should have_css 'a',       :count => 1 }
