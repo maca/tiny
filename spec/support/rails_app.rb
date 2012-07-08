@@ -8,9 +8,10 @@ module RailsTestApp
     config.secret_token = '572c86f5ede338bd8aba8dae0fd3a326aabababc98d1e6ce34b9f5'
 
     routes.draw do
-      get '/haml'        => 'rails_test_app/test#haml'
-      get '/erb'         => 'rails_test_app/test#erb'
-      get '/erb_helpers' => 'rails_test_app/test#erb_helpers'
+      get '/erb'          => 'rails_test_app/test#erb'
+      get '/erb_helpers'  => 'rails_test_app/test#erb_helpers'
+      get '/haml'         => 'rails_test_app/test#haml'
+      get '/haml_helpers' => 'rails_test_app/test#haml_helpers'
     end
   end
 
@@ -32,7 +33,12 @@ module RailsTestApp
     def haml
       render :template => "haml_list"
     end
+
+    def haml_helpers
+      render :template => "haml_list_with_helpers"
+    end
   end
 end
 
+# Rails app boot
 require 'haml/template'

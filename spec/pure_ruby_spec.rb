@@ -74,7 +74,21 @@ describe 'markup helpers' do
     end
 
     describe 'buffering' do
-      describe 'concatenation' do
+      describe 'tag concatenation' do
+        before do
+          @output = tag(:ul) do
+            tag(:li)
+            tag(:li)
+            tag(:li)
+          end
+        end
+
+        it { output.should have_css 'ul',      :count => 1 }
+        it { output.should have_css 'li',      :count => 3 }
+        it { output.should have_css 'ul > li', :count => 3 }
+      end
+
+      describe 'concatenation with text' do
         before do
           @output = tag(:ul) do
             tag(:li) { text 'One' }
@@ -108,17 +122,24 @@ describe 'markup helpers' do
         it { output.should have_css 'ul > li > a', :text => 'Two' }
         it { output.should have_css 'ul > li > a', :text => 'Three' }
       end
-
-      describe 'text' do
-        it 'should escape text' do
-          @output = tag(:li){ text '&<>' }
-          @output.should =~ /&amp;&lt;&gt;/
+      
+      describe 'outside content block' do
+        it 'should not concatenate contigous calls' do
+          tag(:div)
+          tag(:div).should == '<div />'
         end
+      end
+    end
 
-        it 'should allow not scaped text' do
-          @output = tag(:li){ text! '&<>' }
-          @output.should =~ /&<>/
-        end
+    describe 'text' do
+      it 'should escape text' do
+        @output = tag(:li){ text '&<>' }
+        @output.should =~ /&amp;&lt;&gt;/
+      end
+
+      it 'should allow not scaped text' do
+        @output = tag(:li){ text! '&<>' }
+        @output.should =~ /&<>/
       end
     end
 

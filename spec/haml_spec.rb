@@ -84,4 +84,12 @@ describe 'markup helpers' do
       output.should == "<ul>\n  <li>\n    Hi\n    Hi\n  </li>\n</ul>\n"
     end
   end
+
+  describe 'with helpers' do
+    before do
+      @output = Renderer.new('haml_list_with_helpers.haml').render
+      puts @output.inspect
+    end
+    it_should_behave_like 'it renders my list'
+  end
 end
