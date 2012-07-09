@@ -125,7 +125,7 @@ describe 'markup helpers' do
       
       describe 'outside content block' do
         it 'should not concatenate contigous calls' do
-          tag(:div)
+          tag(:ul)
           tag(:div).should == '<div />'
         end
       end

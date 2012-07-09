@@ -46,8 +46,15 @@ module Tiny
         html_tag name, attrs, &block
       end
 
+      def block_is_haml? block
+        eval 'defined? _hamlout', block.binding
+      end
+      
+      def block_is_ruby? block
+      end
+
       def tiny_capture *args, &block
-        if haml_template? 
+        if block_is_haml? block
           capture_haml *args, &block
         else
           with_blank_buffer *args, &block
@@ -95,7 +102,7 @@ module Tiny
 
       tag_attrs.empty?? '' : " #{tag_attrs}"
     end
-
+    
     def render scope, &block
       content = scope.tiny_capture(self, &block) if block_given?
 
