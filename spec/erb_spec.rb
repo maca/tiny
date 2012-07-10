@@ -28,7 +28,6 @@ describe 'markup helpers' do
             <% end %>
           ERB
         end.render(self)
-        puts @output.inspect
       end
       it { output.should have_css 'div',     :count => 1 }
       it { output.should have_css 'a',       :count => 1 }
@@ -72,6 +71,7 @@ describe 'markup helpers' do
   describe 'with helpers' do
     before do
       @output = Renderer.new('erb_list_with_helpers.erb').render
+      puts "output: #{@output.inspect}"
     end
     it_should_behave_like 'it renders my list'
   end

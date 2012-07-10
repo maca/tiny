@@ -30,22 +30,45 @@ module Tiny
       /\.rb$/ === eval('__FILE__', block.binding)
     end
 
-    def tiny_capture *args, &block
-      __buffers << ''
-      if haml_block? block
-        capture_haml *args, &block
-      else
-        yield
-      end
-      __buffers.pop
+    def block_buffer block
+      eval('_buf', block.binding)
     end
 
-    def tiny_concat markup
-      if __buffers.size == 1
-        markup
+    def tiny_capture *args, &block
+      if ruby_block? block
+        __buffers << ''
+        yield(*args)
+        __buffers.pop
       else
-        __buffers.last << markup
+        template_capture *args, &block
       end
+    end
+
+    def template_capture *args, &block
+      buffer     = block_buffer(block)
+      buffer_was = buffer.dup
+      buffer.clear
+      yield(*args) and buffer.dup
+    ensure
+      buffer.replace buffer_was
+    end
+
+    def tiny_concat markup, block = nil
+      puts "buffer #{__buffers.size - 1}: #{markup.inspect}"
+      if !block || ruby_block?(block)
+        if __buffers.size == 1
+          markup
+        else
+          __buffers.last << markup
+        end
+      else
+        template_concat markup, block
+      end
+    end
+
+    def template_concat markup, block
+      puts "block buffer: #{bloc_buffer(block).inspect}"
+      block_buffer(block) << markup
     end
 
     def __buffers
@@ -70,11 +93,11 @@ module Tiny
     end
 
     def render scope, &block
-      scope.tiny_concat render_tag(scope, &block)
+      content = scope.tiny_capture(self, &block) if block_given?
+      scope.tiny_concat render_tag(content), block
     end
 
-    def render_tag scope, &block
-      content = scope.tiny_capture(self, &block) if block_given?
+    def render_tag content
       if content
         content.gsub!(/^(?!\s*$)/, "  ")
         content.gsub!(/\A(?!$)|(?<!^|\n)\z/, "\n") 
