@@ -88,7 +88,7 @@ describe 'markup helpers' do
   describe 'with helpers' do
     before do
       @output = Renderer.new('haml_list_with_helpers.haml').render
-      puts @output.inspect
+      puts "Output: #{@output.inspect}"
     end
     it_should_behave_like 'it renders my list'
   end

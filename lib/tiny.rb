@@ -6,73 +6,105 @@ require 'ext/tilt/template'
 
 module Tiny
   module Helpers
+    attr_reader :tilt_context
+
     def html_tag name, attrs = {}, &block
       Tag.new(name, attrs).render(self, &block)
     end
+    alias :tag :html_tag
 
     def text content
-      tiny_concat Rack::Utils.escape_html(content.to_s) + "\n"
+      output_buffer << Rack::Utils.escape_html(content.to_s) + "\n"
     end
 
     def text! content
-      tiny_concat content.to_s + "\n"
+      output_buffer << content.to_s + "\n"
     end
 
-    def tag name, attrs = {}, &block
-      html_tag name, attrs, &block
-    end
-
-    def haml_block? block
-      eval 'defined? _hamlout', block.binding
-    end
-
-    def ruby_block? block
-      /\.rb$/ === eval('__FILE__', block.binding)
-    end
-
-    def block_buffer block
-      eval('_buf', block.binding)
-    end
-
-    def tiny_capture *args, &block
-      if ruby_block? block
-        __buffers << ''
-        yield(*args)
-        __buffers.pop
+    def self.included base
+      if defined?(ActionView) && base == ActionView::Base 
+        base.send :include, Rails
       else
-        template_capture *args, &block
+        base.send :include, Generic
       end
     end
 
-    def template_capture *args, &block
-      buffer     = block_buffer(block)
-      buffer_was = buffer.dup
-      buffer.clear
-      yield(*args) and buffer.dup
-    ensure
-      buffer.replace buffer_was
-    end
+    module Rails
+      def tiny_capture *args, &block
+        capture(*args, &block).tap { |haml| puts "Captured: #{haml.inspect}" }
+      end
 
-    def tiny_concat markup, block = nil
-      puts "buffer #{__buffers.size - 1}: #{markup.inspect}"
-      if !block || ruby_block?(block)
-        if __buffers.size == 1
+      def tiny_concat markup, block = nil
+        output_buffer << markup.html_safe and nil
+      end
+    end 
+
+    module Generic
+      def tiny_capture *args, &block
+        if haml_block?(block)
+          value  = nil
+          buffer = capture_haml(*args) { value = yield(*args) }
+          if !buffer.empty?
+            buffer
+          elsif value.is_a?(String)
+            value
+          else
+            ''
+          end
+        else
+          value  = nil
+          buffer = with_blank_buffer { value = yield(*args) }
+          if !buffer.empty?
+            buffer
+          elsif value.is_a?(String)
+            value
+          else
+            ''
+          end
+        end
+      end
+
+      def haml_block? block
+        eval 'defined? _hamlout', block.binding
+      end
+
+      def with_blank_buffer *args, &block
+        buffer = output_buffer.dup
+        output_buffer.clear and yield(*args)
+        return output_buffer.dup
+      ensure
+        output_buffer.replace buffer
+      end
+
+      def ruby_block? block
+        /\.rb$/ === eval('__FILE__', block.binding) if block
+      end
+
+      def tiny_concat markup, block = nil
+        if erb_template?
+          output_buffer << markup and nil
+        elsif haml_template? && !ruby_block?(block)
           markup
         else
-          __buffers.last << markup
+          output_buffer << markup
         end
-      else
-        template_concat markup, block
       end
-    end
 
-    def template_concat markup, block
-      puts "block buffer: #{bloc_buffer(block).inspect}"
-      block_buffer(block) << markup
-    end
+      def output_buffer
+        if outvar = tilt_context.instance_variable_get(:@outvar)
+          instance_variable_get outvar
+        else
+          @output_buffer ||= ''
+        end
+      end
 
-    def __buffers
-      @__buffers ||= ['']
+      def erb_template?
+        tilt_context.is_a?(Tilt::ERBTemplate)
+      end
+
+      def haml_template?
+        tilt_context.is_a?(Tilt::HamlTemplate)
+      end 
     end
   end
 
@@ -107,4 +139,7 @@ module Tiny
       end
     end
   end
+
+  Sinatra.register self if defined?(Sinatra)
+  ActionView::Base.send :include, Helpers if defined?(ActionView)
 end

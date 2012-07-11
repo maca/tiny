@@ -30,7 +30,6 @@ describe 'markup helpers' do
         output.should == "<li data-something />"
       end
 
-
       it 'should not allow passing text without #text' do
         output = tag(:li) { 'Hello' }
         output.should == '<li></li>'

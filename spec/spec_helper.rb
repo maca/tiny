@@ -17,17 +17,17 @@ SUPPORT  = "#{File.dirname __FILE__}/support"
 
 shared_examples_for 'it renders my list' do
   it { output.should have_css 'ul',    :count => 1 }
-  # it { output.should have_css 'li',    :count => 3 }
-  # it { output.should have_css 'a',     :count => 3 }
-  # it { output.should have_css 'span',  :count => 3 }
-  # it { output.should have_css 'ul > li' }
-  # it { output.should have_css 'ul > li > a' }
-  # it { output.should have_css 'ul > li > a', :text => 'A' }
-  # it { output.should have_css 'ul > li > a > span', :text => '1' }
-  # it { output.should have_css 'ul > li > a', :text => 'B' }
-  # it { output.should have_css 'ul > li > a > span', :text => '2' }
-  # it { output.should have_css 'ul > li > a', :text => 'C' }
-  # it { output.should have_css 'ul > li > a > span', :text => '3' }
+  it { output.should have_css 'li',    :count => 3 }
+  it { output.should have_css 'a',     :count => 3 }
+  it { output.should have_css 'span',  :count => 3 }
+  it { output.should have_css 'ul > li' }
+  it { output.should have_css 'ul > li > a' }
+  it { output.should have_css 'ul > li > a', :text => 'A' }
+  it { output.should have_css 'ul > li > a > span', :text => '1' }
+  it { output.should have_css 'ul > li > a', :text => 'B' }
+  it { output.should have_css 'ul > li > a > span', :text => '2' }
+  it { output.should have_css 'ul > li > a', :text => 'C' }
+  it { output.should have_css 'ul > li > a > span', :text => '3' }
 end
 
 class Renderer
