@@ -2,7 +2,7 @@ module ListHelper
   def list nums, &block
     html_tag(:ul) do
       nums.each(&block)
-    end.tap { |tag| puts "Tag: #{tag}" }
+    end
   end
 
   def item_content num

@@ -31,7 +31,7 @@ module Tiny
 
     module Rails
       def tiny_capture *args, &block
-        capture(*args, &block).tap { |haml| puts "Captured: #{haml.inspect}" }
+        capture(*args, &block)
       end
 
       def tiny_concat markup, block = nil
@@ -42,25 +42,9 @@ module Tiny
     module Generic
       def tiny_capture *args, &block
         if haml_block?(block)
-          value  = nil
-          buffer = capture_haml(*args) { value = yield(*args) }
-          if !buffer.empty?
-            buffer
-          elsif value.is_a?(String)
-            value
-          else
-            ''
-          end
+          capture_haml(*args, &block)
         else
-          value  = nil
-          buffer = with_blank_buffer { value = yield(*args) }
-          if !buffer.empty?
-            buffer
-          elsif value.is_a?(String)
-            value
-          else
-            ''
-          end
+          with_blank_buffer(*args, &block)
         end
       end
 
@@ -81,30 +65,21 @@ module Tiny
       end
 
       def tiny_concat markup, block = nil
-        if erb_template?
+        if tilt_context
           output_buffer << markup and nil
-        elsif haml_template? && !ruby_block?(block)
-          markup
         else
           output_buffer << markup
         end
       end
 
       def output_buffer
+        return haml_buffer.buffer if defined? haml_buffer
         if outvar = tilt_context.instance_variable_get(:@outvar)
           instance_variable_get outvar
         else
           @output_buffer ||= ''
         end
       end
-
-      def erb_template?
-        tilt_context.is_a?(Tilt::ERBTemplate)
-      end
-
-      def haml_template?
-        tilt_context.is_a?(Tilt::HamlTemplate)
-      end 
     end
   end
 
