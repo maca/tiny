@@ -6,19 +6,6 @@ require 'ext/tilt/template'
 
 module Tiny
   module Helpers
-    def html_tag name, attrs = {}, &block
-      Tag.new(name, attrs).render(self, &block)
-    end
-    alias :tag :html_tag
-
-    def text content
-      output_buffer << Rack::Utils.escape_html(content.to_s) + "\n"
-    end
-
-    def text! content
-      output_buffer << content.to_s + "\n"
-    end
-
     def self.included base
       if defined?(ActionView) && base == ActionView::Base 
         base.send :include, ActionViewHelpers
@@ -29,12 +16,28 @@ module Tiny
       end
     end
 
+    module TextHelpers
+      def html_tag name, attrs = {}, &block
+        Tag.new(name, attrs).render(self, &block)
+      end
+
+      def text content
+        output_buffer << Rack::Utils.escape_html(content.to_s) + "\n"
+      end
+
+      def text! content
+        output_buffer << content.to_s + "\n"
+      end
+    end
+
     module ActionViewHelpers
+      include TextHelpers
+
       def tiny_capture *args, &block
         capture(*args, &block)
       end
 
-      def tiny_concat markup, block = nil
+      def tiny_concat markup
         output_buffer << markup.html_safe and nil
       end
     end 
@@ -53,6 +56,7 @@ module Tiny
       attr_reader :tilt_context
 
       def tiny_capture *args, &block
+        return super unless tilt_context
         with_blank_buffer(*args, &block)
       end
 
@@ -64,23 +68,42 @@ module Tiny
         output_buffer.replace buffer
       end
 
-      def tiny_concat markup, block = nil
+      def tiny_concat markup
         return super unless tilt_context
         output_buffer << markup and nil
       end
 
       def output_buffer
-        if outvar = tilt_context.instance_variable_get(:@outvar)
-          instance_variable_get outvar
-        else
-          @output_buffer ||= ''
-        end
+        return super unless tilt_context
+        outvar = tilt_context.instance_variable_get(:@outvar)
+        instance_variable_get outvar
       end
     end
 
     module RubyHelpers
-      def tiny_concat markup, block = nil
-        output_buffer << markup
+      include TextHelpers
+      alias :tag :html_tag
+
+      def tiny_capture *args, &block
+        __buffers << ''
+        yield *args
+        __buffers.pop
+      end
+
+      def tiny_concat markup
+        if __buffers.size == 1
+          markup
+        else
+          output_buffer << markup
+        end
+      end
+
+      def __buffers
+        @__buffers ||= ['']
+      end
+
+      def output_buffer
+        __buffers.last
       end
     end
   end
@@ -103,7 +126,7 @@ module Tiny
     
     def render scope, &block
       content = scope.tiny_capture(self, &block) if block_given?
-      scope.tiny_concat render_tag(content), block
+      scope.tiny_concat render_tag(content)
     end
 
     def render_tag content
