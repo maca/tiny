@@ -6,9 +6,12 @@ require 'ext/tilt/template'
 
 module Tiny
   module Helpers
+    attr_reader :tilt_context
+
     def html_tag name, attrs = {}, &block
       Tag.new(name, attrs).render(self, &block)
     end
+    alias :tag :html_tag
 
     def text content
       output_buffer << Rack::Utils.escape_html(content.to_s) + "\n"
@@ -28,37 +31,25 @@ module Tiny
 
     module Rails
       def tiny_capture *args, &block
-        capture *args, &block
+        capture(*args, &block)
       end
 
-      def erb_template?
-        true
+      def tiny_concat markup, block = nil
+        output_buffer << markup.html_safe and nil
       end
-
-      def haml_template?
-      end
-    end
+    end 
 
     module Generic
-      attr_reader :tilt_context
-
-      def tag name, attrs = {}, &block
-        html_tag name, attrs, &block
-      end
-
-      def block_is_haml? block
-        eval 'defined? _hamlout', block.binding
-      end
-      
-      def block_is_ruby? block
-      end
-
       def tiny_capture *args, &block
-        if block_is_haml? block
-          capture_haml *args, &block
+        if haml_block?(block)
+          capture_haml(*args, &block)
         else
-          with_blank_buffer *args, &block
+          with_blank_buffer(*args, &block)
         end
+      end
+
+      def haml_block? block
+        eval 'defined? _hamlout', block.binding
       end
 
       def with_blank_buffer *args, &block
@@ -69,15 +60,20 @@ module Tiny
         output_buffer.replace buffer
       end
 
-      def erb_template?
-        tilt_context.is_a?(Tilt::ERBTemplate)
+      def ruby_block? block
+        /\.rb$/ === eval('__FILE__', block.binding) if block
       end
 
-      def haml_template?
-        tilt_context.is_a?(Tilt::HamlTemplate)
+      def tiny_concat markup, block = nil
+        if tilt_context
+          output_buffer << markup and nil
+        else
+          output_buffer << markup
+        end
       end
 
       def output_buffer
+        return haml_buffer.buffer if defined? haml_buffer
         if outvar = tilt_context.instance_variable_get(:@outvar)
           instance_variable_get outvar
         else
@@ -90,8 +86,8 @@ module Tiny
   class Tag
     attr_reader :tag_name, :attrs
 
-    def initialize tag_name, attrs = {}, &block
-      @tag_name, @attrs, @block = tag_name, attrs, block
+    def initialize tag_name, attrs = {}
+      @tag_name, @attrs = tag_name, attrs
     end
 
     def tag_attributes
@@ -105,24 +101,18 @@ module Tiny
     
     def render scope, &block
       content = scope.tiny_capture(self, &block) if block_given?
-
-      if content
-        content.gsub!(/^(?!\s*$)/, "  ") unless scope.erb_template?
-        content.gsub!(/\A(?!$)|(?<!^|\n)\z/, "\n") 
-        tag = %{<#{tag_name}#{tag_attributes}>#{content}</#{tag_name}>}
-      else
-        tag = %{<#{tag_name}#{tag_attributes} />}
-      end
-
-      tag = tag.html_safe if tag.respond_to?(:html_safe)
-      return tag if scope.haml_template?
-      scope.output_buffer << tag
-      scope.output_buffer unless scope.erb_template?
+      scope.tiny_concat render_tag(content), block
     end
-  end
 
-  def self.registered app
-    app.helpers Helpers
+    def render_tag content
+      if content
+        content.gsub!(/^(?!\s*$)/, "  ")
+        content.gsub!(/\A(?!$)|(?<!^|\n)\z/, "\n") 
+        %{<#{tag_name}#{tag_attributes}>#{content}</#{tag_name}>}
+      else
+        %{<#{tag_name}#{tag_attributes} />}
+      end
+    end
   end
 
   Sinatra.register self if defined?(Sinatra)

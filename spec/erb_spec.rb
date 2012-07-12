@@ -39,9 +39,6 @@ describe 'markup helpers' do
         <<-ERB
           <% tag(:div) do |div| %>
             <% div.should be_a Tiny::Tag %>
-            <% tag(:a) do |a| %>
-              <% a.tag_name.should == :a %>
-            <% end %>
           <% end %>
         ERB
       end.render(self)

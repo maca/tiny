@@ -30,7 +30,6 @@ describe 'markup helpers' do
         output.should == "<li data-something />"
       end
 
-
       it 'should not allow passing text without #text' do
         output = tag(:li) { 'Hello' }
         output.should == '<li></li>'
@@ -70,6 +69,14 @@ describe 'markup helpers' do
         it { output.should have_css 'div > a', :text => 'Hello' }
         it { output.should have_css 'img',     :count => 1 }
         it { output.should have_css 'div > a > img' }
+      end
+
+      describe 'block args' do
+        it 'should pass tag as block arg' do
+          tag(:div) do |div|
+            div.should be_a Tiny::Tag
+          end
+        end
       end
     end
 
@@ -124,9 +131,9 @@ describe 'markup helpers' do
       end
       
       describe 'outside content block' do
-        it 'should not concatenate contigous calls' do
-          tag(:ul)
-          tag(:div).should == '<div />'
+        it 'should not concatenate contiguous calls' do
+          tag(:span)
+          tag(:a).should == '<a />'
         end
       end
     end
