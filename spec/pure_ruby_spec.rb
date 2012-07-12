@@ -42,6 +42,16 @@ describe 'markup helpers' do
         it { output.should have_css 'li.item' }
         it { output.should have_css 'li.in-stock' }
       end
+
+      describe 'safe and unsafe' do
+        it 'should escape attribute html' do
+          tag(:a, :href => '<script>').should == '<a href="&lt;script&gt;" />'
+        end
+
+        it 'should allow html in attribute' do
+          tag(:a, :href => raw('<script>')).should == '<a href="<script>" />'
+        end
+      end
     end
 
     describe 'blocks' do

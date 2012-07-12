@@ -5,14 +5,28 @@ require 'tiny/version'
 require 'ext/tilt/template'
 
 module Tiny
+  class SafeString < String
+    def html_safe?; true end
+  end
+
   module Helpers
-    def self.included base
-      if defined?(ActionView) && base == ActionView::Base 
-        base.send :include, ActionViewHelpers
-      else
-        base.send :include, RubyHelpers
-        base.send :include, ERBHelpers
-        base.send :include, HamlHelpers
+    class << self
+      def included base
+        if defined?(ActionView) && base == ActionView::Base 
+          base.send :include, ActionViewHelpers
+        else
+          base.send :include, RubyHelpers
+          base.send :include, ERBHelpers
+          base.send :include, HamlHelpers
+        end
+      end
+
+      def sanitize value
+        if value.respond_to?(:html_safe?) && value.html_safe?
+          value.to_s
+        else
+          Rack::Utils.escape_html value.to_s
+        end
       end
     end
 
@@ -22,11 +36,11 @@ module Tiny
       end
 
       def text content
-        output_buffer << Rack::Utils.escape_html(content.to_s) + "\n"
+        output_buffer << Helpers.sanitize(content) + "\n"
       end
 
       def text! content
-        output_buffer << content.to_s + "\n"
+        text raw(content)
       end
     end
 
@@ -84,6 +98,10 @@ module Tiny
       include TextHelpers
       alias :tag :html_tag
 
+      def raw val
+        SafeString.new val.to_s
+      end
+
       def tiny_capture *args, &block
         __buffers << ''
         yield *args
@@ -92,7 +110,7 @@ module Tiny
 
       def tiny_concat markup
         if __buffers.size == 1
-          markup
+          output_buffer.clear and markup
         else
           output_buffer << markup
         end
@@ -118,10 +136,16 @@ module Tiny
     def tag_attributes
       tag_attrs = attrs.map do |name, val|
         next if val.nil? || val == []
-        val == true ? name : %{#{name}="#{[*val].join(' ')}"}
+        next name if val == true
+
+        vals = [*val].map do |value|
+          Helpers.sanitize value
+        end
+
+        %{#{name}="#{vals.join(' ')}"}
       end.compact.join(' ')
 
-      tag_attrs.empty?? '' : " #{tag_attrs}"
+      " #{tag_attrs}" unless tag_attrs.empty?
     end
     
     def render scope, &block
