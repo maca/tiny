@@ -6,8 +6,6 @@ require 'ext/tilt/template'
 
 module Tiny
   module Helpers
-    attr_reader :tilt_context
-
     def html_tag name, attrs = {}, &block
       Tag.new(name, attrs).render(self, &block)
     end
@@ -23,13 +21,15 @@ module Tiny
 
     def self.included base
       if defined?(ActionView) && base == ActionView::Base 
-        base.send :include, Rails
+        base.send :include, ActionViewHelpers
       else
-        base.send :include, Generic
+        base.send :include, RubyHelpers
+        base.send :include, ERBHelpers
+        base.send :include, HamlHelpers
       end
     end
 
-    module Rails
+    module ActionViewHelpers
       def tiny_capture *args, &block
         capture(*args, &block)
       end
@@ -39,17 +39,21 @@ module Tiny
       end
     end 
 
-    module Generic
+    module HamlHelpers
       def tiny_capture *args, &block
-        if haml_block?(block)
-          capture_haml(*args, &block)
-        else
-          with_blank_buffer(*args, &block)
-        end
+        Haml::Helpers.block_is_haml?(block) ? capture_haml(*args, &block) : super
       end
 
-      def haml_block? block
-        eval 'defined? _hamlout', block.binding
+      def output_buffer
+        defined?(haml_buffer) ? haml_buffer.buffer : super
+      end
+    end
+
+    module ERBHelpers
+      attr_reader :tilt_context
+
+      def tiny_capture *args, &block
+        with_blank_buffer(*args, &block)
       end
 
       def with_blank_buffer *args, &block
@@ -60,25 +64,23 @@ module Tiny
         output_buffer.replace buffer
       end
 
-      def ruby_block? block
-        /\.rb$/ === eval('__FILE__', block.binding) if block
-      end
-
       def tiny_concat markup, block = nil
-        if tilt_context
-          output_buffer << markup and nil
-        else
-          output_buffer << markup
-        end
+        return super unless tilt_context
+        output_buffer << markup and nil
       end
 
       def output_buffer
-        return haml_buffer.buffer if defined? haml_buffer
         if outvar = tilt_context.instance_variable_get(:@outvar)
           instance_variable_get outvar
         else
           @output_buffer ||= ''
         end
+      end
+    end
+
+    module RubyHelpers
+      def tiny_concat markup, block = nil
+        output_buffer << markup
       end
     end
   end
