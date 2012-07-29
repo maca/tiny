@@ -7,17 +7,22 @@ require 'ext/tilt/template'
 module Tiny
   class SafeString < String
     def html_safe?; true end
+
+    def concat string
+      return super unless String === string
+      super Helpers.sanitize string
+    end
   end
 
   module Helpers
     class << self
       def included base
-        if defined?(ActionView) && base == ActionView::Base 
+        if defined?(ActionView) && base.ancestors.include?(ActionView::Base)
           base.send :include, ActionViewHelpers
         else
           base.send :include, RubyHelpers
-          base.send :include, ERBHelpers
-          base.send :include, HamlHelpers
+          base.send :include, ERBHelpers  if defined? Haml
+          base.send :include, HamlHelpers if defined?(ERB) || defined?(Erubis)
         end
       end
 
@@ -36,11 +41,24 @@ module Tiny
       end
 
       def text content
-        output_buffer << Helpers.sanitize(content) + "\n"
+        tiny_concat Helpers.sanitize(content) + "\n"
       end
 
       def text! content
         text raw(content)
+      end
+
+      def comment content
+        text! "<!-- #{content.to_s.gsub(/-(?=-)/, '- ')} -->"
+      end
+
+      def cdata content
+        content = content.to_s.gsub(']]>', ']]]]><![CDATA[>')
+        text! "<![CDATA[#{content}]]>"
+      end
+
+      def doctype
+        "<!DOCTYPE html>"
       end
     end
 
@@ -56,7 +74,37 @@ module Tiny
       end
     end 
 
+    module RubyHelpers
+      include TextHelpers
+      alias :tag :html_tag
+
+      def raw val
+        SafeString.new val.to_s
+      end
+
+      def tiny_capture *args, &block
+        buffer_stack << ''
+        yield *args
+        buffer_stack.pop
+      end
+
+      def tiny_concat markup
+        output_buffer ? output_buffer.concat(markup) : markup
+      end
+
+      private
+      def buffer_stack
+        @buffer_stack ||= []
+      end
+
+      def output_buffer
+        buffer_stack.last
+      end
+    end
+
     module HamlHelpers
+      include RubyHelpers
+
       def tiny_capture *args, &block
         Haml::Helpers.block_is_haml?(block) ? capture_haml(*args, &block) : super
       end
@@ -67,6 +115,7 @@ module Tiny
     end
 
     module ERBHelpers
+      include RubyHelpers
       attr_reader :tilt_context
 
       def tiny_capture *args, &block
@@ -91,37 +140,6 @@ module Tiny
         return super unless tilt_context
         outvar = tilt_context.instance_variable_get(:@outvar)
         instance_variable_get outvar
-      end
-    end
-
-    module RubyHelpers
-      include TextHelpers
-      alias :tag :html_tag
-
-      def raw val
-        SafeString.new val.to_s
-      end
-
-      def tiny_capture *args, &block
-        __buffers << ''
-        yield *args
-        __buffers.pop
-      end
-
-      def tiny_concat markup
-        if __buffers.size == 1
-          output_buffer.clear and markup
-        else
-          output_buffer << markup
-        end
-      end
-
-      def __buffers
-        @__buffers ||= ['']
-      end
-
-      def output_buffer
-        __buffers.last
       end
     end
   end
@@ -157,9 +175,9 @@ module Tiny
       if content
         content.gsub!(/^(?!\s*$)/, "  ")
         content.gsub!(/\A(?!$)|(?<!^|\n)\z/, "\n") 
-        %{<#{tag_name}#{tag_attributes}>#{content}</#{tag_name}>}
+        "<#{tag_name}#{tag_attributes}>#{content}</#{tag_name}>"
       else
-        %{<#{tag_name}#{tag_attributes} />}
+        "<#{tag_name}#{tag_attributes} />"
       end
     end
   end

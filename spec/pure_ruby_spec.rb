@@ -179,4 +179,44 @@ describe 'markup helpers' do
       end
     end
   end
+
+  describe 'special nodes' do
+    describe 'comments' do
+      it 'should emit comment' do
+        comment('hello').should == "<!-- hello -->\n"
+        comment('hello -- world').should == "<!-- hello - - world -->\n"
+        comment('hello -- -- world').should == "<!-- hello - - - - world -->\n"
+      end
+
+      it 'should buffer comments' do
+        tag(:div) do
+          comment 'foo'
+          comment 'bar'
+        end.should == "<div>\n  <!-- foo -->\n  <!-- bar -->\n</div>"
+      end
+    end
+
+    describe 'cdata' do
+      it 'should emit cdata' do
+        cdata('hello').should == "<![CDATA[hello]]>\n"
+      end
+
+      it 'should buffer cdata' do
+        tag(:div) do
+          cdata('foo')
+          cdata('bar')
+        end.should == "<div>\n  <![CDATA[foo]]>\n  <![CDATA[bar]]>\n</div>"
+      end
+
+      it 'should not "escape" cdata terminator' do
+        cdata(']]>').should == "<![CDATA[]]]]><![CDATA[>]]>\n"
+      end
+    end
+
+    describe 'doctype' do
+      it 'should emit html5 doctype' do
+        doctype.should == '<!DOCTYPE html>'
+      end
+    end
+  end
 end
