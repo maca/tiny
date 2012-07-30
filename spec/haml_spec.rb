@@ -69,7 +69,7 @@ describe 'markup helpers' do
   = tag(:li)
         HAML
       end.render(self)
-      output.should == "<ul>\n  <li />\n</ul>\n"
+      output.should == "<ul>\n  <li></li>\n</ul>\n"
     end
 
     it 'shuould concat with newlines after text' do

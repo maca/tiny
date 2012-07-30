@@ -61,7 +61,7 @@ describe 'markup helpers' do
 <% end %>
         ERB
       end.render(self)
-      output.should == "<ul>\n  <li />\n</ul>"
+      output.should == "<ul>\n  <li></li></ul>"
     end
   end
 

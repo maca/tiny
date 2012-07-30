@@ -21,13 +21,13 @@ describe 'markup helpers' do
       end
 
       it 'should not use blank attribute values' do
-        output = tag(:li, :class => [], :id => nil) { text 'Hello' }
-        output.should =~ /<li>/
+        output = tag(:li, :class => [], :id => nil)
+        output.should == "<li></li>"
       end
 
       it 'should not emit value for an atribute value of true' do
         output = tag(:li, 'data-something' => true)
-        output.should == "<li data-something />"
+        output.should == "<li data-something></li>"
       end
 
       it 'should not allow passing text without #text' do
@@ -35,21 +35,19 @@ describe 'markup helpers' do
         output.should == '<li></li>'
       end
 
-      describe 'multiple classes' do
-        before do
-          @output = tag(:li, :class => %w(item in-stock)) { text 'Hello' }
-        end
-        it { output.should have_css 'li.item' }
-        it { output.should have_css 'li.in-stock' }
+      it 'should output multiple classes passing an array' do
+        output = tag(:li, :class => %w(item in-stock))
+        output.should == '<li class="item in-stock"></li>'
       end
 
-      describe 'safe and unsafe' do
+      describe 'safety' do
         it 'should escape attribute html' do
-          tag(:a, :href => '<script>').should == '<a href="&lt;script&gt;" />'
+          tag(:a, :href => '<script>').should == '<a href="&lt;script&gt;"></a>'
+          tag(:a, :href => 'art&copy').should == '<a href="art&amp;copy"></a>'
         end
 
         it 'should allow html in attribute' do
-          tag(:a, :href => raw('<script>')).should == '<a href="<script>" />'
+          tag(:a, :href => raw('<script>')).should == '<a href="<script>"></a>'
         end
       end
     end
@@ -143,7 +141,7 @@ describe 'markup helpers' do
       describe 'outside content block' do
         it 'should not concatenate contiguous calls' do
           tag(:span)
-          tag(:a).should == '<a />'
+          tag(:a).should == '<a></a>'
         end
       end
     end
@@ -158,6 +156,8 @@ describe 'markup helpers' do
         @output = tag(:li){ text! '&<>' }
         @output.should =~ /&<>/
       end
+
+      it 'should concat text'
     end
 
     describe 'formatting' do
@@ -165,7 +165,7 @@ describe 'markup helpers' do
         output = tag(:ul) do
           tag (:li)
         end
-        output.should == "<ul>\n  <li />\n</ul>"
+        output.should == "<ul>\n  <li></li>\n</ul>"
       end
 
       it 'shuould concat with newlines after text' do
@@ -216,6 +216,48 @@ describe 'markup helpers' do
     describe 'doctype' do
       it 'should emit html5 doctype' do
         doctype.should == '<!DOCTYPE html>'
+      end
+    end
+  end
+
+  describe 'tag closing' do
+    describe 'void tags' do
+      it 'should define void tags' do
+        Tiny::HTMLTags.void_tags.should == %w(area base br col hr img input link meta param embed)
+      end
+
+      Tiny::HTMLTags.void_tags.each do |tag_name|
+        describe tag_name do
+          it 'sould autoclose' do
+            tag(tag_name).should == "<#{tag_name} />"
+          end
+
+          it 'should omit content' do
+            tag(tag_name){ text 'hi' }.should == "<#{tag_name} />"
+          end
+        end
+      end
+    end
+
+    describe 'content tags' do
+      it 'should define content tags' do
+        tags  = %w(
+          article aside audio bdi canvas command datalist details
+          figcaption figure header hgroup keygen mark meter nav output progress
+          section source summary track video wbr a abbr address b bdo big
+          blockquote body button caption cite code colgroup dd del dfn div dl dt
+          em fieldset footer form h1 h2 h3 h4 h5 h6 head html i iframe ins kbd
+          label legend li map noscript object ol optgroup option p pre q rp rt
+          ruby s samp script select small span strike strong style sub sup table
+          tbody td textarea tfoot th thead time title tr tt u ul var
+        )
+        Tiny::HTMLTags.content_tags.should == tags
+      end
+
+      Tiny::HTMLTags.content_tags.each do |tag_name|
+        it "should not autoclose #{tag_name} if not empty" do
+          tag(tag_name).should == "<#{tag_name}></#{tag_name}>"
+        end
       end
     end
   end

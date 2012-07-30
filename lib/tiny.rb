@@ -2,6 +2,7 @@ require 'tilt'
 require 'haml'
 require 'rack/utils'
 require 'tiny/version'
+require 'tiny/html_tags'
 require 'ext/tilt/template'
 
 module Tiny
@@ -146,7 +147,6 @@ module Tiny
 
   class Tag
     attr_reader :tag_name, :attrs
-
     def initialize tag_name, attrs = {}
       @tag_name, @attrs = tag_name, attrs
     end
@@ -167,18 +167,27 @@ module Tiny
     end
     
     def render scope, &block
+      return void_tag if tag_void?
+
       content = scope.tiny_capture(self, &block) if block_given?
-      scope.tiny_concat render_tag(content)
+      scope.tiny_concat content_tag(content)
     end
 
-    def render_tag content
+    def tag_void?
+      HTMLTags.void_tags.include? tag_name
+    end
+
+    def void_tag
+      "<#{tag_name}#{tag_attributes} />"
+    end
+
+    def content_tag content
       if content
         content.gsub!(/^(?!\s*$)/, "  ")
         content.gsub!(/\A(?!$)|(?<!^|\n)\z/, "\n") 
-        "<#{tag_name}#{tag_attributes}>#{content}</#{tag_name}>"
-      else
-        "<#{tag_name}#{tag_attributes} />"
       end
+
+      "<#{tag_name}#{tag_attributes}>#{content}</#{tag_name}>"
     end
   end
 
