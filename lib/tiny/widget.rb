@@ -3,8 +3,12 @@ module Tiny
     include HTMLTags
     include Tiny::Helpers
 
+    def content
+      raise NotImplementedError
+    end
+
     def render
-      widget do
+      markup do
         content
       end
     end

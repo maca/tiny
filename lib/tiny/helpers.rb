@@ -21,11 +21,11 @@ module Tiny
     end
 
     module TextHelpers
-      def html_tag name, attrs_or_content = {}, attrs = {}, &block
-        if Hash === attrs_or_content
+      def html_tag name, attrs_or_content = {}, attrs = nil, &block
+        if Hash === attrs_or_content && attrs.nil?
           Tag.new(name, attrs_or_content).render(self, &block)
         else
-          Tag.new(name, attrs).render(self) { text attrs_or_content }
+          Tag.new(name, attrs || {}).render(self) { text attrs_or_content }
         end
       end
 
@@ -37,7 +37,7 @@ module Tiny
         text raw(content)
       end
 
-      def widget &block
+      def markup &block
         tiny_concat tiny_capture(&block)
       end
 

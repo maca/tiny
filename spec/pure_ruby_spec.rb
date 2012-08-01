@@ -265,9 +265,9 @@ describe 'markup helpers' do
     end
   end
 
-  describe 'widget' do
+  describe 'markup' do
     before do
-      @output = widget do
+      @output = markup do
         tag(:head) { tag(:title, "Tiny Page!") }
         tag(:body) { tag(:h1, "Hello Tiny!") }
       end
