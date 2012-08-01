@@ -40,6 +40,11 @@ describe 'markup helpers' do
         output.should == '<li class="item in-stock"></li>'
       end
 
+      it 'should allow passing content as string' do
+        tag(:h1, "Hello").should == "<h1>\n  Hello\n</h1>"
+        tag(:h1, "Hello", :class => 'main').should == %{<h1 class="main">\n  Hello\n</h1>} 
+      end
+
       describe 'safety' do
         it 'should escape attribute html' do
           tag(:a, :href => '<script>').should == '<a href="&lt;script&gt;"></a>'
@@ -156,8 +161,6 @@ describe 'markup helpers' do
         @output = tag(:li){ text! '&<>' }
         @output.should =~ /&<>/
       end
-
-      it 'should concat text'
     end
 
     describe 'formatting' do
@@ -183,9 +186,9 @@ describe 'markup helpers' do
   describe 'special nodes' do
     describe 'comments' do
       it 'should emit comment' do
-        comment('hello').should == "<!-- hello -->\n"
-        comment('hello -- world').should == "<!-- hello - - world -->\n"
-        comment('hello -- -- world').should == "<!-- hello - - - - world -->\n"
+        comment('Hello').should == "<!-- Hello -->\n"
+        comment('Hello -- world').should == "<!-- Hello - - world -->\n"
+        comment('Hello -- -- world').should == "<!-- Hello - - - - world -->\n"
       end
 
       it 'should buffer comments' do
@@ -198,7 +201,7 @@ describe 'markup helpers' do
 
     describe 'cdata' do
       it 'should emit cdata' do
-        cdata('hello').should == "<![CDATA[hello]]>\n"
+        cdata('Hello').should == "<![CDATA[Hello]]>\n"
       end
 
       it 'should buffer cdata' do
@@ -258,6 +261,49 @@ describe 'markup helpers' do
         it "should not autoclose #{tag_name} if not empty" do
           tag(tag_name).should == "<#{tag_name}></#{tag_name}>"
         end
+      end
+    end
+  end
+
+  describe 'widget' do
+    before do
+      @output = widget do
+        tag(:head) { tag(:title, "Tiny Page!") }
+        tag(:body) { tag(:h1, "Hello Tiny!") }
+      end
+    end
+
+    it { output.should have_css 'head', :count => 1 }
+    it { output.should have_css 'head > title', :text => "Tiny Page!", :count => 1 }
+    it { output.should have_css 'body', :count => 1 }
+    it { output.should have_css 'body > h1', :text => "Hello Tiny!", :count => 1 }
+  end
+
+  describe 'dsl' do
+    include Tiny::HTMLTags
+
+    describe 'void tags' do
+      Tiny::HTMLTags.void_tags.each do |tag_name|
+        it "should render '#{tag_name}'" do
+          self.send(tag_name).should == "<#{tag_name} />"
+        end
+      end
+
+      it "should render attributes" do
+        link(:href => "some.css").should == '<link href="some.css" />'
+      end
+    end
+
+    describe 'content tags' do
+      Tiny::HTMLTags.content_tags.each do |tag_name|
+        it "should render '#{tag_name}'" do
+          self.send(tag_name).should == "<#{tag_name}></#{tag_name}>"
+        end
+      end
+      
+      it "should render content and attributes" do
+        h1(:class => 'main') { text "Hello" }.should == %{<h1 class="main">\n  Hello\n</h1>} 
+        h1("Hello", :class => 'main').should == %{<h1 class="main">\n  Hello\n</h1>} 
       end
     end
   end

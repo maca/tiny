@@ -4,8 +4,13 @@ module Tiny
     @void_tags    = []
 
     class << self
-      def tag_def name, void = false
-        void ? @void_tags.push(name) : @content_tags.push(name)
+      def tag_def tag_name, void_tag = false
+        class_eval(<<-RUBY, __FILE__, __LINE__ + 1)
+          def #{tag_name} *args, &block
+            html_tag "#{tag_name}", *args, &block
+          end
+        RUBY
+        void_tag ? @void_tags.push(tag_name) : @content_tags.push(tag_name)
       end
 
       def content_tags
