@@ -7,9 +7,9 @@ module Tiny
       raise NotImplementedError
     end
 
-    def render
+    def render &block
       markup do
-        content
+        content &block 
       end
     end
   end
