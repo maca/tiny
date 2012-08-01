@@ -58,7 +58,7 @@ describe Tiny::Widget do
       @output = Class.new(Tiny::Widget) do
         def content
           div :id => :content do
-            text! yield
+            yield
           end
         end
       end.new.render { tag :h1, @title }
@@ -66,6 +66,20 @@ describe Tiny::Widget do
 
     it { output.should have_css 'div#content', :count => 1 }
     it { output.should have_css 'div#content > h1', :text => "Content", :count => 1 }
+  end
+
+  describe 'rendering a block from outside with concatenated tags' do
+    before do
+      @output = Class.new(Tiny::Widget) do
+        def content &block
+          div(:id => :content, &block)
+        end
+      end.new.render { tag(:h1, "Title"); tag(:p, "Content") }
+    end
+
+    it { output.should have_css 'div#content', :count => 1 }
+    it { output.should have_css 'div#content > h1', :text => "Title", :count => 1 }
+    it { output.should have_css 'div#content > p', :text => "Content", :count => 1 }
   end
 
   describe 'widget with no content overriden' do

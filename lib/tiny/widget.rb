@@ -9,7 +9,11 @@ module Tiny
 
     def render &block
       markup do
-        content &block 
+        next content unless block_given?
+        content do
+          context = eval('self', block.binding)
+          text! context.instance_eval{ markup(&block) } 
+        end
       end
     end
   end
