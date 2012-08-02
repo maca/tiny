@@ -16,5 +16,6 @@ module Tiny
         end
       end
     end
+    alias to_html render
   end
 end

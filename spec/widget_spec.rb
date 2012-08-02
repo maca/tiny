@@ -15,7 +15,7 @@ describe Tiny::Widget do
           head { title "Tiny Page!" }
           body { h1 "Hello Tiny!" }
         end
-      end.new.render
+      end.new.to_html
     end
 
     it { output.should have_css 'head', :count => 1 }
@@ -43,7 +43,7 @@ describe Tiny::Widget do
           notices
           main
         end
-      end.new.render
+      end.new.to_html
     end
 
     it { output.should have_css 'div#notices', :count => 1 }
@@ -61,7 +61,7 @@ describe Tiny::Widget do
             yield
           end
         end
-      end.new.render { tag :h1, @title }
+      end.new.to_html { tag :h1, @title }
     end
 
     it { output.should have_css 'div#content', :count => 1 }
@@ -74,7 +74,7 @@ describe Tiny::Widget do
         def content &block
           div(:id => :content, &block)
         end
-      end.new.render { tag(:h1, "Title"); tag(:p, "Content") }
+      end.new.to_html { tag(:h1, "Title"); tag(:p, "Content") }
     end
 
     it { output.should have_css 'div#content', :count => 1 }
@@ -85,7 +85,7 @@ describe Tiny::Widget do
   describe 'widget with no content overriden' do
     it 'should raise not implemented' do
       lambda do
-        Class.new(Tiny::Widget).new.render
+        Class.new(Tiny::Widget).new.to_html
       end.should raise_error(NotImplementedError)
     end
   end
