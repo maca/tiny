@@ -41,17 +41,6 @@ describe 'markup helpers' do
       it { output.should have_css 'div > a', :text => 'Hello' }
     end
 
-    it 'should pass tag to block' do
-      Tilt['haml'].new do 
-        <<-HAML
-= tag(:div) do |div|
-  - div.should be_a Tiny::Tag 
-  = tag(:a) do |a|
-    - a.tag_name.should == :a
-        HAML
-      end.render(self)
-    end
-
     describe 'nested' do
       before do
         @output = Tilt.new("#{FIXTURES}/haml_list.haml").render(self)

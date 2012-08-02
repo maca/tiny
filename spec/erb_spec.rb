@@ -34,16 +34,6 @@ describe 'markup helpers' do
       it { output.should have_css 'div > a', :text => 'Hello' }
     end
 
-    it 'should pass tag to block' do
-      @output = Tilt['erb'].new(:outvar => '@_out_buf') do 
-        <<-ERB
-          <% tag(:div) do |div| %>
-            <% div.should be_a Tiny::Tag %>
-          <% end %>
-        ERB
-      end.render(self)
-    end
-
     describe 'nested' do
       before do
         @output = Renderer.new('erb_list.erb').render

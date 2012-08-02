@@ -12,7 +12,7 @@ module Tiny
         next content unless block_given?
         content do
           context = eval('self', block.binding)
-          text! context.instance_eval{ markup(&block) } 
+          text! context.instance_eval{ tiny_capture(&block) } 
         end
       end
     end

@@ -83,14 +83,6 @@ describe 'markup helpers' do
         it { output.should have_css 'img',     :count => 1 }
         it { output.should have_css 'div > a > img' }
       end
-
-      describe 'block args' do
-        it 'should pass tag as block arg' do
-          tag(:div) do |div|
-            div.should be_a Tiny::Tag
-          end
-        end
-      end
     end
 
     describe 'buffering' do
