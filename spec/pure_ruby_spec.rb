@@ -136,7 +136,7 @@ describe 'markup helpers' do
       end
       
       describe 'outside content block' do
-        it 'should not concatenate contiguous calls' do
+        it 'should not buffer contiguous tags' do
           tag(:span)
           tag(:a).should == '<a></a>'
         end
@@ -156,14 +156,14 @@ describe 'markup helpers' do
     end
 
     describe 'formatting' do
-      it 'shuould concat with newlines and indentation' do
+      it 'should buffer with newlines and indentation' do
         output = tag(:ul) do
           tag (:li)
         end
         output.should == "<ul>\n  <li></li>\n</ul>"
       end
 
-      it 'shuould concat with newlines after text' do
+      it 'should buffer with newlines after text' do
         output = tag(:ul) do
           tag (:li) do
             text 'Hi'

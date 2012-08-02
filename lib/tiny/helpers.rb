@@ -82,7 +82,7 @@ module Tiny
       end
 
       def tiny_concat markup
-        output_buffer ? output_buffer.concat(markup) : markup
+        working_buffer ? working_buffer.concat(markup) : markup
       end
 
       private
@@ -90,7 +90,7 @@ module Tiny
         @buffer_stack ||= []
       end
 
-      def output_buffer
+      def working_buffer
         buffer_stack.last
       end
     end

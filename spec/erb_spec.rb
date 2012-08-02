@@ -41,6 +41,20 @@ describe 'markup helpers' do
       it_should_behave_like 'it renders my list'
     end
   end
+
+  describe 'buffering' do
+    it 'should not buffer multiple tags' do
+      template = Tilt['erb'].new(:outvar => '@_out_buf') { '<%= yield %>' }
+      output   = template.render(self) { tag(:span); tag(:a) }
+      output.should == '<a></a>'
+    end
+
+    it 'should buffer multiple tags inside markup block' do
+      template = Tilt['erb'].new(:outvar => '@_out_buf') { '<%= yield %>' }
+      output   = template.render(self) { markup { tag(:span); tag(:a) }  }
+      output.should == '<span></span><a></a>'
+    end
+  end
   
   describe 'formatting' do
     it 'shuould concat with newlines and indentation' do
