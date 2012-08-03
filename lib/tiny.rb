@@ -1,11 +1,12 @@
-require 'tilt'
+require 'erubis'
 require 'haml'
+require 'tilt'
 require 'rack/utils'
 require 'tiny/version'
 require 'tiny/helpers'
 require 'tiny/html_tags'
 require 'tiny/widget'
-require 'ext/tilt/template'
+require 'tiny/erubis'
 
 module Tiny
   class SafeString < String

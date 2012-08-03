@@ -1,6 +1,5 @@
 # encoding: utf-8
 require 'spec_helper'
-require 'erubis'
 
 describe 'markup helpers' do
   include Tiny::Helpers
@@ -9,20 +8,50 @@ describe 'markup helpers' do
     Capybara::Node::Simple.new(@output)
   end
 
-  describe 'tag' do
-    it 'should emit tag' do
-      @output = Tilt['erb'].new(:outvar => '@_out_buf') { '<%= tag(:div) %>' }.render(self)
-      output.should have_css 'div', :count => 1
+  def span &block
+    markup do
+      tag(:span, &block)
     end
   end
+
+  def check_block &block
+    erb_block?(block).should be_true
+  end
+ 
+  it 'should determine block origin' do
+    Tilt['erb'].new { '<% check_block do %><% end  %>' }.render(self)
+  end
+
+  it 'should emit tag' do
+    @output = Tilt['erb'].new { '<%= tag(:div) %>' }.render(self)
+    output.should have_css 'div', :count => 1
+  end
+
+  it 'should not buffer multiple tags' do
+    template = Tilt['erb'].new { '<%= yield %>' }
+    output   = template.render(self) { tag(:span); tag(:a) }
+    output.should == '<a></a>'
+  end
+
+  it 'should buffer multiple tags inside markup block' do
+    template = Tilt['erb'].new { '<%= yield %>' }
+    output   = template.render(self) { markup { tag(:span); tag(:a) }  }
+    output.should == '<span></span><a></a>'
+  end
+
+  it 'should concat erb block' do
+    template = Tilt['erb'].new(:outvar => '@_out_buf') { '<%= span do %>Hello<% end %>' }
+    template.render(self).should == "<span>\n  Hello\n</span>"
+  end
+
 
   describe 'block passing' do
     describe 'shallow' do
       before do
         @output = Tilt['erb'].new(:outvar => '@_out_buf') do 
           <<-ERB
-            <% tag(:div) do %>
-              <% tag(:a) do %>
+            <%= tag(:div) do %>
+              <%= tag(:a) do %>
                 Hello
               <% end %>
             <% end %>
@@ -41,37 +70,11 @@ describe 'markup helpers' do
       it_should_behave_like 'it renders my list'
     end
   end
-
-  describe 'buffering' do
-    it 'should not buffer multiple tags' do
-      template = Tilt['erb'].new(:outvar => '@_out_buf') { '<%= yield %>' }
-      output   = template.render(self) { tag(:span); tag(:a) }
-      output.should == '<a></a>'
-    end
-
-    it 'should buffer multiple tags inside markup block' do
-      template = Tilt['erb'].new(:outvar => '@_out_buf') { '<%= yield %>' }
-      output   = template.render(self) { markup { tag(:span); tag(:a) }  }
-      output.should == '<span></span><a></a>'
-    end
-  end
   
-  describe 'formatting' do
-    it 'shuould concat with newlines and indentation' do
-      output = Tilt['erb'].new(:outvar => '@_out_buf') do 
-        <<-ERB
-<% tag(:ul) do %>
-  <%= tag(:li) %>
-<% end %>
-        ERB
-      end.render(self)
-      output.should == "<ul>\n  <li></li></ul>"
-    end
-  end
-
   describe 'with helpers' do
     before do
       @output = Renderer.new('erb_list_with_helpers.erb').render
+      puts @output.inspect
     end
     it_should_behave_like 'it renders my list'
   end

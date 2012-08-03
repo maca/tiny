@@ -6,8 +6,8 @@ module Tiny
           base.send :include, ActionViewHelpers
         else
           base.send :include, RubyHelpers
-          base.send :include, ERBHelpers  if defined? Haml
-          base.send :include, HamlHelpers if defined?(ERB) || defined?(Erubis)
+          base.send :include, ERBHelpers
+          base.send :include, HamlHelpers
         end
       end
 
@@ -35,10 +35,6 @@ module Tiny
 
       def text! content
         text raw(content)
-      end
-
-      def markup &block
-        tiny_concat tiny_capture(&block)
       end
 
       def comment content
@@ -85,6 +81,10 @@ module Tiny
         working_buffer ? working_buffer.concat(markup) : markup
       end
 
+      def markup &block
+        tiny_capture(&block)
+      end
+
       private
       def buffer_stack
         @buffer_stack ||= []
@@ -101,38 +101,26 @@ module Tiny
       def tiny_capture *args, &block
         Haml::Helpers.block_is_haml?(block) ? capture_haml(*args, &block) : super
       end
-
-      def output_buffer
-        defined?(haml_buffer) ? haml_buffer.buffer : super
-      end
     end
 
     module ERBHelpers
       include RubyHelpers
-      attr_reader :tilt_context
 
       def tiny_capture *args, &block
-        return super unless tilt_context
-        with_blank_buffer(*args, &block)
+        erb_block?(block) ? capture_erb(&block) : super
       end
 
-      def with_blank_buffer *args, &block
+      def erb_block? block
+        block && eval('defined?(__in_erb_template)', block.binding)
+      end
+
+      def capture_erb *args, &block
+        output_buffer = eval('_buf', block.binding)
         buffer = output_buffer.dup
         output_buffer.clear and yield(*args)
         return output_buffer.dup
       ensure
         output_buffer.replace buffer
-      end
-
-      def tiny_concat markup
-        return super unless tilt_context
-        output_buffer << markup and nil
-      end
-
-      def output_buffer
-        return super unless tilt_context
-        outvar = tilt_context.instance_variable_get(:@outvar)
-        instance_variable_get outvar
       end
     end
   end
