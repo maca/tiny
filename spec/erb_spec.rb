@@ -44,7 +44,6 @@ describe 'markup helpers' do
     template.render(self).should == "<span>\n  Hello\n</span>"
   end
 
-
   describe 'block passing' do
     describe 'shallow' do
       before do
@@ -74,7 +73,6 @@ describe 'markup helpers' do
   describe 'with helpers' do
     before do
       @output = Renderer.new('erb_list_with_helpers.erb').render
-      puts @output.inspect
     end
     it_should_behave_like 'it renders my list'
   end

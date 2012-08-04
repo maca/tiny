@@ -7,6 +7,28 @@ describe Tiny::Widget do
   let(:output) do
     Capybara::Node::Simple.new(@output)
   end
+  
+  describe "simple widget" do
+    it 'should output content' do
+      output = Class.new(Tiny::Widget) do
+        def content
+          text! '<div></div>'
+        end
+      end.new.to_html
+      output.should == "<div></div>\n"
+    end
+
+    it 'should output content with block' do
+      output = Class.new(Tiny::Widget) do
+        def content
+          tiny_concat "<div>"
+          yield
+          tiny_concat "</div>"
+        end
+      end.new.to_html { text 'Hello' }
+      output.should == "<div>Hello\n</div>\n"
+    end
+  end
 
   describe "page widget" do
     before do
@@ -52,7 +74,7 @@ describe Tiny::Widget do
     it { output.should have_css 'div#content > h1', :text => "Content", :count => 1 }
   end
 
-  describe 'rendering a block from outside' do
+  describe 'rendering a tag from outside' do
     before do
       @title  = "Content" # no need to smuggle instance variables 
       @output = Class.new(Tiny::Widget) do

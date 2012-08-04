@@ -41,8 +41,8 @@ describe 'markup helpers' do
       end
 
       it 'should allow passing content as string' do
-        tag(:h1, "Hello").should == "<h1>\n  Hello\n</h1>"
-        tag(:h1, "Hello", :class => 'main').should == %{<h1 class="main">\n  Hello\n</h1>} 
+        tag(:h1, "Hello").should == "<h1>Hello</h1>"
+        tag(:h1, "Hello", :class => 'main').should == %{<h1 class="main">Hello</h1>} 
       end
 
       describe 'safety' do
@@ -295,7 +295,7 @@ describe 'markup helpers' do
       
       it "should render content and attributes" do
         h1(:class => 'main') { text "Hello" }.should == %{<h1 class="main">\n  Hello\n</h1>} 
-        h1("Hello", :class => 'main').should == %{<h1 class="main">\n  Hello\n</h1>} 
+        h1("Hello", :class => 'main').should == %{<h1 class="main">Hello</h1>} 
       end
     end
   end

@@ -50,30 +50,6 @@ describe 'markup helpers' do
     end
   end
 
-  describe 'formatting' do
-    it 'should concat with newlines and indentation' do
-      output = Tilt['haml'].new do 
-        <<-HAML
-= tag(:ul) do
-  = tag(:li)
-        HAML
-      end.render(self)
-      output.should == "<ul>\n  <li></li>\n</ul>\n"
-    end
-
-    it 'shuould concat with newlines after text' do
-      output = Tilt['haml'].new do 
-        <<-HAML
-= tag(:ul) do
-  = tag(:li) do
-    Hi
-    Hi
-        HAML
-      end.render(self)
-      output.should == "<ul>\n  <li>\n    Hi\n    Hi\n  </li>\n</ul>\n"
-    end
-  end
-
   describe 'with helpers' do
     before do
       @output = Renderer.new('haml_list_with_helpers.haml').render

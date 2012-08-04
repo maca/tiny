@@ -22,11 +22,7 @@ module Tiny
 
     module TextHelpers
       def html_tag name, attrs_or_content = {}, attrs = nil, &block
-        if Hash === attrs_or_content && attrs.nil?
-          tiny_concat Tag.new(name, attrs_or_content).render(&block)
-        else
-          tiny_concat Tag.new(name, attrs || {}).render { text attrs_or_content }
-        end
+        tiny_concat Tag.new(name, attrs_or_content, attrs).render(&block)
       end
 
       def text content

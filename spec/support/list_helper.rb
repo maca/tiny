@@ -1,8 +1,6 @@
 module ListHelper
-  def list nums, &block
-    html_tag(:ul) do
-      nums.each(&block)
-    end
+  def list &block
+    html_tag(:ul, &block)
   end
 
   def item_content num

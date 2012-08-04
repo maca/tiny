@@ -15,11 +15,11 @@ module Tiny
   module Erubis
     module ErubyExtensions
       def add_expr_literal src, code
-        src << "_buf.append= #{code}\n"
+        src << "_buf.append= #{code};"
       end
 
       def add_expr_escaped src, code
-        src << "_buf.append_escaped= #{code}\n"
+        src << "_buf.append_escaped= #{code};"
       end
     end
 
@@ -40,7 +40,7 @@ module Tiny
       end
 
       def precompiled_preamble locals
-        [super, "__in_erb_template=true"].join("\n")
+        [super, "@erb_buffer=_buf", "__in_erb_template=true"].join("\n")
       end
     end
 

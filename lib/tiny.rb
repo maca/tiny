@@ -20,10 +20,13 @@ module Tiny
 
   class Tag
     attr_reader :tag_name, :attrs
-    def initialize tag_name, attrs = {}
-      @tag_name, @attrs = tag_name, attrs
+    def initialize tag_name, aoc = {}, attrs = nil
+      @attrs, @content =
+        Hash === aoc && attrs.nil?? [aoc] : [attrs || {}, aoc]
+      @content  = Helpers.sanitize(@content) if @content 
+      @tag_name = tag_name
     end
-
+    
     def tag_attributes
       tag_attrs = attrs.map do |name, val|
         next if val.nil? || val == []
@@ -38,19 +41,21 @@ module Tiny
 
       " #{tag_attrs}" unless tag_attrs.empty?
     end
-    
+
     def render &block
-      return "<#{tag_name}#{tag_attributes} />" if void_tag?
+      if void_tag?
+        "<#{tag_name}#{tag_attributes} />"
+      else
+        content = @content 
+        if block_given?
+          context = eval('self', block.binding)
+          content = context.tiny_capture(&block)
+          content.gsub!(/^(?!\s*$)/, "  ")
+          content.gsub!(/\A(?!$)|(?<!^|\n)\z/, "\n") 
+        end
 
-      content = nil
-      if block_given?
-        context = eval('self', block.binding)
-        content = context.tiny_capture(&block)
-        content.gsub!(/^(?!\s*$)/, "  ")
-        content.gsub!(/\A(?!$)|(?<!^|\n)\z/, "\n") 
+        "<#{tag_name}#{tag_attributes}>#{content}</#{tag_name}>"
       end
-
-      "<#{tag_name}#{tag_attributes}>#{content}</#{tag_name}>"
     end
 
     def void_tag?
