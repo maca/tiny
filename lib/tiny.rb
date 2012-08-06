@@ -4,7 +4,7 @@ require 'tilt'
 require 'escape_utils'
 require 'tiny/version'
 require 'tiny/helpers'
-require 'tiny/html_tags'
+require 'tiny/html'
 require 'tiny/widget'
 require 'tiny/erubis'
 
@@ -49,7 +49,7 @@ module Tiny
         content = @content 
         if block_given?
           context = eval('self', block.binding)
-          content = context.tiny_capture(&block)
+          content = context.markup(&block)
           content.gsub!(/^(?!\s*$)/, "  ")
           content.gsub!(/\A(?!$)|(?<!^|\n)\z/, "\n") 
         end
@@ -59,7 +59,7 @@ module Tiny
     end
 
     def void_tag?
-      HTMLTags.void_tags.include? tag_name
+      HTML.void_tags.include? tag_name
     end
   end
 

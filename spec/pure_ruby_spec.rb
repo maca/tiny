@@ -212,10 +212,10 @@ describe 'markup helpers' do
   describe 'tag closing' do
     describe 'void tags' do
       it 'should define void tags' do
-        Tiny::HTMLTags.void_tags.should == %w(area base br col hr img input link meta param embed)
+        Tiny::HTML.void_tags.should == %w(area base br col hr img input link meta param embed)
       end
 
-      Tiny::HTMLTags.void_tags.each do |tag_name|
+      Tiny::HTML.void_tags.each do |tag_name|
         describe tag_name do
           it 'sould autoclose' do
             tag(tag_name).should == "<#{tag_name} />"
@@ -240,10 +240,10 @@ describe 'markup helpers' do
           ruby s samp script select small span strike strong style sub sup table
           tbody td textarea tfoot th thead time title tr tt u ul var
         )
-        Tiny::HTMLTags.content_tags.should == tags
+        Tiny::HTML.content_tags.should == tags
       end
 
-      Tiny::HTMLTags.content_tags.each do |tag_name|
+      Tiny::HTML.content_tags.each do |tag_name|
         it "should not autoclose #{tag_name} if not empty" do
           tag(tag_name).should == "<#{tag_name}></#{tag_name}>"
         end
@@ -266,10 +266,10 @@ describe 'markup helpers' do
   end
 
   describe 'dsl' do
-    include Tiny::HTMLTags
+    include Tiny::HTML
 
     describe 'void tags' do
-      Tiny::HTMLTags.void_tags.each do |tag_name|
+      Tiny::HTML.void_tags.each do |tag_name|
         it "should render '#{tag_name}'" do
           self.send(tag_name).should == "<#{tag_name} />"
         end
@@ -281,7 +281,7 @@ describe 'markup helpers' do
     end
 
     describe 'content tags' do
-      Tiny::HTMLTags.content_tags.each do |tag_name|
+      Tiny::HTML.content_tags.each do |tag_name|
         it "should render '#{tag_name}'" do
           self.send(tag_name).should == "<#{tag_name}></#{tag_name}>"
         end

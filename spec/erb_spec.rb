@@ -23,7 +23,7 @@ describe 'markup helpers' do
   end
 
   it 'should capture erb' do
-    Tilt['erb'].new { '<% mk = markup do %>Hello<% end %><%- mk.should == "Hello" %>' }.render(self)
+    Tilt['erb'].new { '<% mk = markup("Tiny!") do |s| %>Hello <%= s %><% end %><%- mk.should == "Hello Tiny!" %>' }.render(self)
   end
 
   it 'should emit tag' do

@@ -1,6 +1,6 @@
 module Tiny
   class Widget
-    include HTMLTags
+    include HTML
     include Tiny::Helpers
 
     def content
@@ -12,7 +12,7 @@ module Tiny
         next content unless block_given?
         content do
           context = eval('self', block.binding)
-          text! context.instance_eval{ tiny_capture(&block) } 
+          text! context.instance_eval{ markup(&block) } 
         end
       end
     end
