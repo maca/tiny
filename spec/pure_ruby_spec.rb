@@ -45,15 +45,9 @@ describe 'markup helpers' do
         tag(:h1, "Hello", :class => 'main').should == %{<h1 class="main">Hello</h1>} 
       end
 
-      describe 'safety' do
-        it 'should escape attribute html' do
-          tag(:a, :href => '<script>').should == '<a href="&lt;script&gt;"></a>'
-          tag(:a, :href => 'art&copy').should == '<a href="art&amp;copy"></a>'
-        end
-
-        it 'should allow html in attribute' do
-          tag(:a, :href => raw('<script>')).should == '<a href="<script>"></a>'
-        end
+      it 'should escape attribute html' do
+        tag(:a, :href => '<script>').should == '<a href="&lt;script&gt;"></a>'
+        tag(:a, :href => 'art&copy').should == '<a href="art&amp;copy"></a>'
       end
     end
 

@@ -26,7 +26,7 @@ describe Tiny::Widget do
           tiny_concat "</div>"
         end
       end.new.to_html { text 'Hello' }
-      output.should == "<div>Hello\n</div>\n"
+      output.should == "<div>Hello\n</div>"
     end
   end
 

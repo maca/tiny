@@ -40,7 +40,7 @@ module Tiny
       end
 
       def precompiled_preamble locals
-        [super, "@erb_buffer=_buf", "__in_erb_template=true"].join("\n")
+        [super, "__in_erb_template=true"].join("\n")
       end
     end
 

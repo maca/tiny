@@ -1,7 +1,7 @@
 require 'erubis'
 require 'haml'
 require 'tilt'
-require 'rack/utils'
+require 'escape_utils'
 require 'tiny/version'
 require 'tiny/helpers'
 require 'tiny/html_tags'
@@ -33,7 +33,7 @@ module Tiny
         next name if val == true
 
         vals = [*val].map do |value|
-          Helpers.sanitize value
+          EscapeUtils.escape_html value.to_s, false
         end
 
         %{#{name}="#{vals.join(' ')}"}

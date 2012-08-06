@@ -15,7 +15,7 @@ module Tiny
         if value.respond_to?(:html_safe?) && value.html_safe?
           value.to_s
         else
-          Rack::Utils.escape_html value.to_s
+          EscapeUtils.escape_html value.to_s
         end
       end
     end
@@ -26,7 +26,8 @@ module Tiny
       end
 
       def text content
-        tiny_concat Helpers.sanitize(content) + "\n"
+        tiny_concat Helpers.sanitize(content).gsub(/(?<!^|\n)\z/, "\n")
+          
       end
 
       def text! content

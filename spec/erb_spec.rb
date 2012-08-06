@@ -22,6 +22,10 @@ describe 'markup helpers' do
     Tilt['erb'].new { '<% check_block do %><% end  %>' }.render(self)
   end
 
+  it 'should capture erb' do
+    Tilt['erb'].new { '<% mk = markup do %>Hello<% end %><%- mk.should == "Hello" %>' }.render(self)
+  end
+
   it 'should emit tag' do
     @output = Tilt['erb'].new { '<%= tag(:div) %>' }.render(self)
     output.should have_css 'div', :count => 1
