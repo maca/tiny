@@ -27,7 +27,6 @@ module Tiny
 
       def text content
         tiny_concat Helpers.sanitize(content).gsub(/(?<!^|\n)\z/, "\n")
-          
       end
 
       def text! content
@@ -48,18 +47,6 @@ module Tiny
       end
     end
 
-    module ActionViewHelpers
-      include TextHelpers
-
-      def tiny_capture *args, &block
-        capture(*args, &block)
-      end
-
-      def tiny_concat markup
-        output_buffer << markup.html_safe and nil
-      end
-    end 
-
     module RubyHelpers
       include TextHelpers
       alias :tag :html_tag
@@ -68,18 +55,18 @@ module Tiny
         SafeString.new val.to_s
       end
 
-      def tiny_capture *args, &block
+      def markup *args, &block
         buffer_stack << ''
         yield *args
         buffer_stack.pop
       end
 
       def tiny_concat markup
-        working_buffer ? working_buffer.concat(markup) : markup
+        working_buffer ? working_buffer.concat(markup).html_safe : markup.html_safe
       end
 
-      def markup &block
-        tiny_capture(&block)
+      def erb_block? block
+        block && eval('defined?(__in_erb_template)', block.binding)
       end
 
       private
@@ -92,10 +79,22 @@ module Tiny
       end
     end
 
+    module ActionViewHelpers
+      include RubyHelpers
+
+      def markup *args, &block
+        block_from_template?(block) ? capture(*args, &block) : super
+      end
+
+      def block_from_template? block
+        block && eval('defined?(output_buffer)', block.binding) == 'local-variable'
+      end
+    end 
+
     module HamlHelpers
       include RubyHelpers
 
-      def tiny_capture *args, &block
+      def markup *args, &block
         Haml::Helpers.block_is_haml?(block) ? capture_haml(*args, &block) : super
       end
     end
@@ -103,12 +102,8 @@ module Tiny
     module ERBHelpers
       include RubyHelpers
 
-      def tiny_capture *args, &block
-        erb_block?(block) ? capture_erb(&block) : super
-      end
-
-      def erb_block? block
-        block && eval('defined?(__in_erb_template)', block.binding)
+      def markup *args, &block
+        erb_block?(block) ? capture_erb(*args, &block) : super
       end
 
       def capture_erb *args, &block

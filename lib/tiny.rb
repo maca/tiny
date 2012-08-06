@@ -49,7 +49,7 @@ module Tiny
         content = @content 
         if block_given?
           context = eval('self', block.binding)
-          content = context.tiny_capture(&block)
+          content = context.markup(&block)
           content.gsub!(/^(?!\s*$)/, "  ")
           content.gsub!(/\A(?!$)|(?<!^|\n)\z/, "\n") 
         end
