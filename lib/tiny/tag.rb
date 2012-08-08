@@ -1,17 +1,4 @@
-require 'erubis'
-require 'haml'
-require 'tilt'
-require 'escape_utils'
-require 'tiny/version'
-require 'tiny/helpers'
-require 'tiny/safe_string'
-require 'tiny/tag'
-require 'tiny/html'
-require 'tiny/widget'
-require 'tiny/erubis'
-
 module Tiny
-
   class Tag
     attr_reader :tag_name, :attrs
     def initialize tag_name, aoc = {}, attrs = nil
@@ -56,7 +43,4 @@ module Tiny
       HTML.void_tags.include? tag_name
     end
   end
-
-  Sinatra.register self if defined?(Sinatra)
-  ActionView::Base.send :include, Helpers if defined?(ActionView)
 end
