@@ -4,19 +4,12 @@ require 'tilt'
 require 'escape_utils'
 require 'tiny/version'
 require 'tiny/helpers'
+require 'tiny/safe_string'
 require 'tiny/html'
 require 'tiny/widget'
 require 'tiny/erubis'
 
 module Tiny
-  class SafeString < String
-    def html_safe?; true end
-
-    def concat string
-      return super unless String === string
-      super Helpers.sanitize string
-    end
-  end
 
   class Tag
     attr_reader :tag_name, :attrs
