@@ -40,12 +40,12 @@ describe 'markup helpers' do
   it 'should buffer multiple tags inside markup block' do
     template = Tilt['erb'].new { '<%= yield %>' }
     output   = template.render(self) { markup { tag(:span); tag(:a) }  }
-    output.should == '<span></span><a></a>'
+    output.should == "<span></span>\n<a></a>\n"
   end
 
   it 'should concat erb block' do
     template = Tilt['erb'].new(:outvar => '@_out_buf') { '<%= span do %>Hello<% end %>' }
-    template.render(self).should == "<span>\n  Hello\n</span>"
+    template.render(self).should == "<span>\n  Hello\n</span>\n"
   end
 
   describe 'block passing' do

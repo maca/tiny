@@ -152,9 +152,10 @@ describe 'markup helpers' do
     describe 'formatting' do
       it 'should buffer with newlines and indentation' do
         output = tag(:ul) do
-          tag (:li)
+          tag :li
+          tag :li 
         end
-        output.should == "<ul>\n  <li></li>\n</ul>"
+        output.should == "<ul>\n  <li></li>\n  <li></li>\n</ul>"
       end
 
       it 'should buffer with newlines after text' do
@@ -172,9 +173,9 @@ describe 'markup helpers' do
   describe 'special nodes' do
     describe 'comments' do
       it 'should emit comment' do
-        comment('Hello').should == "<!-- Hello -->\n"
-        comment('Hello -- world').should == "<!-- Hello - - world -->\n"
-        comment('Hello -- -- world').should == "<!-- Hello - - - - world -->\n"
+        comment('Hello').should == "<!-- Hello -->"
+        comment('Hello -- world').should == "<!-- Hello - - world -->"
+        comment('Hello -- -- world').should == "<!-- Hello - - - - world -->"
       end
 
       it 'should buffer comments' do
@@ -187,7 +188,7 @@ describe 'markup helpers' do
 
     describe 'cdata' do
       it 'should emit cdata' do
-        cdata('Hello').should == "<![CDATA[Hello]]>\n"
+        cdata('Hello').should == "<![CDATA[Hello]]>"
       end
 
       it 'should buffer cdata' do
@@ -198,7 +199,7 @@ describe 'markup helpers' do
       end
 
       it 'should not "escape" cdata terminator' do
-        cdata(']]>').should == "<![CDATA[]]]]><![CDATA[>]]>\n"
+        cdata(']]>').should == "<![CDATA[]]]]><![CDATA[>]]>"
       end
     end
 
