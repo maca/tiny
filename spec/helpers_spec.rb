@@ -207,6 +207,12 @@ describe 'markup helpers' do
       it 'should emit html5 doctype' do
         doctype.should == '<!DOCTYPE html>'
       end
+
+      it 'should buffer doctype' do
+        output = markup{ doctype and tag(:html) }
+        output.should == "<!DOCTYPE html>\n<html></html>\n"
+         
+      end
     end
   end
 

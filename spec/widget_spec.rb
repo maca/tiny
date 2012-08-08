@@ -104,6 +104,21 @@ describe Tiny::Widget do
     it { output.should have_css 'div#content > p', :text => "Content", :count => 1 }
   end
 
+  describe 'rendering an erb block' do
+    before do
+      widget = Class.new(Tiny::Widget) do
+        def content &block
+          div(:id => :content, &block)
+        end
+      end.new#.to_html { tag(:h1, "Title"); tag(:p, "Content") }
+      @output = Tilt['erb'].new { '<%= widget.to_html do %><h1>Title</h1><p>Content</p><% end %>' }.render(self, :widget => widget)
+    end
+
+    it { output.should have_css 'div#content', :count => 1 }
+    it { output.should have_css 'div#content > h1', :text => "Title", :count => 1 }
+    it { output.should have_css 'div#content > p', :text => "Content", :count => 1 }
+  end
+
   describe 'widget with no content overriden' do
     it 'should raise not implemented' do
       lambda do
