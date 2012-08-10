@@ -11,7 +11,7 @@ describe Tiny::Widget do
   describe "simple widget" do
     it 'should output content' do
       output = Class.new(Tiny::Widget) do
-        def content
+        def markup
           text! '<div></div>'
         end
       end.new.to_html
@@ -20,7 +20,7 @@ describe Tiny::Widget do
 
     it 'should output content with block' do
       output = Class.new(Tiny::Widget) do
-        def content
+        def markup
           tiny_concat "<div>"
           yield
           tiny_concat "</div>"
@@ -33,7 +33,7 @@ describe Tiny::Widget do
   describe "page widget" do
     before do
       @output = Class.new(Tiny::Widget) do
-        def content
+        def markup
           head { title "Tiny Page!" }
           body { h1 "Hello Tiny!" }
         end
@@ -61,7 +61,7 @@ describe Tiny::Widget do
           end
         end
 
-        def content
+        def markup
           notices
           main
         end
@@ -78,7 +78,7 @@ describe Tiny::Widget do
     before do
       @title  = "Content" # no need to smuggle instance variables 
       @output = Class.new(Tiny::Widget) do
-        def content
+        def markup
           div :id => :content do
             yield
           end
@@ -93,7 +93,7 @@ describe Tiny::Widget do
   describe 'rendering a block from outside with concatenated tags' do
     before do
       @output = Class.new(Tiny::Widget) do
-        def content &block
+        def markup &block
           div(:id => :content, &block)
         end
       end.new.to_html { tag(:h1, "Title"); tag(:p, "Content") }
@@ -107,10 +107,10 @@ describe Tiny::Widget do
   describe 'rendering an erb block' do
     before do
       widget = Class.new(Tiny::Widget) do
-        def content &block
+        def markup &block
           div(:id => :content, &block)
         end
-      end.new#.to_html { tag(:h1, "Title"); tag(:p, "Content") }
+      end.new
       @output = Tilt['erb'].new { '<%= widget.to_html do %><h1>Title</h1><p>Content</p><% end %>' }.render(self, :widget => widget)
     end
 

@@ -9,7 +9,7 @@ describe 'markup helpers' do
   end
 
   def span &block
-    markup do
+    with_buffer do
       tag(:span, &block)
     end
   end
@@ -23,7 +23,7 @@ describe 'markup helpers' do
   end
 
   it 'should capture erb' do
-    Tilt['erb'].new { '<% mk = markup("Tiny!") do |s| %>Hello <%= s %><% end %><%- mk.should == "Hello Tiny!" %>' }.render(self)
+    Tilt['erb'].new { '<% mk = with_buffer("Tiny!") do |s| %>Hello <%= s %><% end %><%- mk.should == "Hello Tiny!" %>' }.render(self)
   end
 
   it 'should emit tag' do
@@ -37,9 +37,9 @@ describe 'markup helpers' do
     output.should == '<a></a>'
   end
 
-  it 'should buffer multiple tags inside markup block' do
+  it 'should buffer multiple tags inside with_buffer block' do
     template = Tilt['erb'].new { '<%= yield %>' }
-    output   = template.render(self) { markup { tag(:span); tag(:a) }  }
+    output   = template.render(self) { with_buffer { tag(:span); tag(:a) }  }
     output.should == "<span></span>\n<a></a>\n"
   end
 

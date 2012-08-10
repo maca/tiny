@@ -4,6 +4,33 @@ module Tiny
     @void_tags    = []
 
     class << self
+      # Void tag names.
+      # Tags that should have no content.
+      # @return [Array]
+      def content_tags
+        @content_tags
+      end
+
+      # Content tag names.
+      # Tags that can have content.
+      # @return [Array]
+      def void_tags
+        @void_tags
+      end
+
+      private
+      # @macro tag_def
+      #  @method $1(attrs_or_content = {}, attrs = nil, &block) 
+      #  Shortcut for {Markup#html_tag html_tag}(:$1)
+      #
+      #
+      #  @param attrs_or_content [Hash, String] Tag's attributes or content.
+      #  @param attrs [Hash] Tag's attributes if content string passed.
+      #  @yield Content block.
+      #  @return [String] HTML markup
+      #
+      #  @see Markup#html_tag
+      #
       def tag_def tag_name, void_tag = false
         class_eval(<<-RUBY, __FILE__, __LINE__ + 1)
           def #{tag_name} *args, &block
@@ -12,16 +39,8 @@ module Tiny
         RUBY
         void_tag ? @void_tags.push(tag_name) : @content_tags.push(tag_name)
       end
-
-      def content_tags
-        @content_tags
-      end
-
-      def void_tags
-        @void_tags
-      end
     end
-
+    
     tag_def 'area',  :void
     tag_def 'base',  :void
     tag_def 'br',    :void

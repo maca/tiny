@@ -5,3 +5,6 @@ pkg/*
 .DS_Store
 *.swp
 *.swo
+doc
+.yardoc
+tags

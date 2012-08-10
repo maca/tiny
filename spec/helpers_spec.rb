@@ -209,7 +209,7 @@ describe 'markup helpers' do
       end
 
       it 'should buffer doctype' do
-        output = markup{ doctype and tag(:html) }
+        output = with_buffer{ doctype and tag(:html) }
         output.should == "<!DOCTYPE html>\n<html></html>\n"
          
       end
@@ -258,9 +258,9 @@ describe 'markup helpers' do
     end
   end
 
-  describe 'markup' do
+  describe 'with_buffer' do
     before do
-      @output = markup do
+      @output = with_buffer do
         tag(:head) { tag(:title, "Tiny Page!") }
         tag(:body) { tag(:h1, "Hello Tiny!") }
       end
