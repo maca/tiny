@@ -1,5 +1,6 @@
 # encoding: utf-8
 require 'spec_helper'
+require 'support/form_helper'
 
 describe Tiny::Widget do
   include Tiny::Helpers
@@ -21,9 +22,9 @@ describe Tiny::Widget do
     it 'should output content with block' do
       output = Class.new(Tiny::Widget) do
         def markup
-          tiny_concat "<div>"
+          text! "<div>"
           yield
-          tiny_concat "</div>"
+          text! "</div>"
         end
       end.new.to_html { text 'Hello' }
       output.should == "<div>\nHello\n</div>\n"
@@ -125,5 +126,21 @@ describe Tiny::Widget do
         Class.new(Tiny::Widget).new.to_html
       end.should raise_error(NotImplementedError)
     end
+  end
+
+  describe 'view helpers using Widget' do
+    include FormHelper
+    before do
+      @output = my_form('/login') { |form| append form.text_input 'email', 'email@example.com' }
+    end
+    it_should_behave_like 'it renders my form'
+  end
+
+  describe 'ERB view helpers using Widget' do
+    include FormHelper
+    before do
+      @output = Tilt['erb'].new { '<%= my_form("/login") do |form| %><%= form.text_input "email", "email@example.com" %><% end %>' }.render(self)
+    end
+    it_should_behave_like 'it renders my form'
   end
 end

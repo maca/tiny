@@ -108,7 +108,7 @@ module Tiny
     #
     #
     def html_tag name, attrs_or_content = {}, attrs = nil, &block
-      tiny_concat Tag.new(name, attrs_or_content, attrs).render(&block)
+      append Tag.new(name, attrs_or_content, attrs).render(&block)
     end
 
     # Appends HTML-escaped text to the content.
@@ -125,7 +125,7 @@ module Tiny
     # @return [String] HTML-escaped.
     #
     def text content
-      tiny_concat Helpers.sanitize(content)
+      append Helpers.sanitize(content)
     end
 
     # Appends non HTML-escaped text to the content.
@@ -245,8 +245,8 @@ module Tiny
     end
 
     private
-    # Concatenates a string to the {working_buffer} if there is one.
-    def tiny_concat string
+    # Appends a string to the {working_buffer} if there is one.
+    def append string
       if working_buffer 
         working_buffer << string.gsub(/(?<!^|\n)\z/, "\n")
       else
@@ -262,6 +262,10 @@ module Tiny
     # Current buffer from the buffer stack.
     def working_buffer
       buffer_stack.last
+    end
+
+    def block_from_template? block
+      false
     end
   end
 
@@ -302,14 +306,6 @@ module Tiny
       erb_block?(block) ? capture_erb(*args, &block) : super
     end
     
-    # Was the block defined within an ERB template?
-    #
-    # @param block [Proc] a Proc object
-    #
-    def erb_block? block
-      block && eval('defined?(__in_erb_template)', block.binding)
-    end
-
     # Capture a section of an ERB template.
     #
     # @param args [any] n number of arguments to be passed to block evaluation
@@ -323,6 +319,14 @@ module Tiny
       return output_buffer.dup
     ensure
       output_buffer.replace buffer
+    end
+
+    # Was the block defined within an ERB template?
+    #
+    # @param block [Proc] a Proc object
+    #
+    def erb_block? block
+      block && eval('defined?(__in_erb_template)', block.binding)
     end
   end
 
@@ -339,7 +343,7 @@ module Tiny
     # @return [String] HTML markup
     #
     def tag name, attrs_or_content = {}, attrs = nil, &block
-      html_tag name, attrs_or_content = {}, attrs = nil, &block
+      html_tag name, attrs_or_content, attrs, &block
     end
 
     # HTML-escapes the passed value unless the content is considered
@@ -416,7 +420,7 @@ module Tiny
         next markup unless block_given?
         markup do |args|
           context = eval('self', block.binding)
-          text! context.instance_eval{ with_buffer(*args, &block) } 
+          append context.instance_eval{ with_buffer(*args, &block) } 
         end
       end
     end
@@ -431,10 +435,11 @@ module Tiny
       block_from_template?(block) ? capture(*args, &block) : super
     end
 
-    def tiny_concat markup
+    def append markup
       super(markup).html_safe
     end
 
+    # Returns true if the block was originated in an ERB or HAML template.
     def block_from_template? block
       block && eval('defined?(output_buffer)', block.binding) == 'local-variable'
     end
@@ -457,7 +462,7 @@ module Tiny
   #     end
   #
   #     def text_input(name, value)
-  #       TextInput.new(name, value).to_html
+  #       text! TextInput.new(name, value).to_html
   #     end
   #   end
   #
@@ -467,8 +472,8 @@ module Tiny
   #     end
   #
   #     def markup
-  #       label(name.capitalize, :for => name)
-  #       input(:type => 'text', :id => name, :name => name, :value => value)
+  #       label(@name.capitalize, :for => @name)
+  #       input(:type => 'text', :id => @name, :name => @name, :value => @value)
   #     end
   #   end
   #

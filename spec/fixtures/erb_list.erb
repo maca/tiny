@@ -5,16 +5,16 @@
       <span>1</span>
     <% end %>
   </li>
-  <li>
+  <%= html_tag(:li) do %>
     <%= html_tag(:a) do %>
       B
       <span>2</span>
     <% end %>
-  </li>
-  <li>
+  <% end %>
+  <%= html_tag(:li) do %>
     <%= html_tag(:a) do %>
       C
       <span>3</span>
     <% end %>
-  </li>
+  <% end %>
 <% end %>

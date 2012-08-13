@@ -3,7 +3,7 @@ module Tiny
     attr_reader :tag_name, :attrs
     def initialize tag_name, aoc = {}, attrs = nil
       @attrs, @content =
-        Hash === aoc && attrs.nil?? [aoc] : [attrs || {}, aoc]
+         Hash === aoc && attrs.nil?? [aoc] : [attrs || {}, aoc]
       @content  = Helpers.sanitize(@content) if @content 
       @tag_name = tag_name
     end

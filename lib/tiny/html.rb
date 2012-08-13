@@ -23,7 +23,6 @@ module Tiny
       #  @method $1(attrs_or_content = {}, attrs = nil, &block) 
       #  Shortcut for {Markup#html_tag html_tag}(:$1)
       #
-      #
       #  @param attrs_or_content [Hash, String] Tag's attributes or content.
       #  @param attrs [Hash] Tag's attributes if content string passed.
       #  @yield Content block.
