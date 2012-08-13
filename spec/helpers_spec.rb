@@ -144,7 +144,7 @@ describe 'markup helpers' do
       end
 
       it 'should allow not scaped text' do
-        @output = tag(:li){ text! '&<>' }
+        @output = tag(:li){ append! '&<>' }
         @output.should =~ /&<>/
       end
     end
@@ -162,7 +162,7 @@ describe 'markup helpers' do
         output = tag(:ul) do
           tag (:li) do
             text 'Hi'
-            text! 'Hi'
+            append! 'Hi'
           end
         end
         output.should == "<ul>\n  <li>\n    Hi\n    Hi\n  </li>\n</ul>"

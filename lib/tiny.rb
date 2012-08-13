@@ -108,45 +108,7 @@ module Tiny
     #
     #
     def html_tag name, attrs_or_content = {}, attrs = nil, &block
-      append Tag.new(name, attrs_or_content, attrs).render(&block)
-    end
-
-    # Appends HTML-escaped text to the content.
-    #
-    #   html_tag(:p) do
-    #     text 'Foo &'
-    #     text 'Bar'
-    #   end
-    #   # => <p>
-    #   Foo &amp;
-    #   Bar
-    #   </p>
-    #
-    # @return [String] HTML-escaped.
-    #
-    def text content
-      append Helpers.sanitize(content)
-    end
-
-    # Appends non HTML-escaped text to the content.
-    #
-    #   html_tag(:p) do
-    #     text! 'Foo & Bar'
-    #     text! '<evil>'
-    #   end
-    #   # => <p>
-    #   Foo & Bar
-    #   <evil>
-    #   </p>
-    #
-    # Shortcut for
-    #
-    #   text raw(content)
-    #
-    # @return [String] Non HTML-escaped.
-    #
-    def text! content
-      text raw(content)
+      append! Tag.new(name, attrs_or_content, attrs).render(&block)
     end
 
     # Appends an HTML coment to the content.
@@ -161,7 +123,7 @@ module Tiny
     # @return [SafeString] HTML content.
     #
     def comment content
-      text! "<!-- #{content.to_s.gsub(/-(?=-)/, '- ')} -->"
+      append! "<!-- #{content.to_s.gsub(/-(?=-)/, '- ')} -->"
     end
 
     # Appends a CDATA section to the content.
@@ -177,7 +139,7 @@ module Tiny
     #
     def cdata content
       content = content.to_s.gsub(']]>', ']]]]><![CDATA[>')
-      text! "<![CDATA[#{content}]]>"
+      append! "<![CDATA[#{content}]]>"
     end
 
     # Appends the doctype to the content
@@ -196,8 +158,56 @@ module Tiny
     # @return [String] Doctype.
     #
     def doctype
-      text! "<!DOCTYPE html>"
+      append! "<!DOCTYPE html>"
     end
+  end
+
+  # Buffering and capturing support.
+  module Buffering
+    # Appends sanitized text to the content.
+    #
+    #   html_tag(:p) do
+    #     text 'Foo &'
+    #     text 'Bar'
+    #   end
+    #   # => <p>
+    #   Foo &amp;
+    #   Bar
+    #   </p>
+    #
+    # @return [String] HTML-escaped.
+    #
+    def append string
+      string = Helpers.sanitize(string)
+      if working_buffer 
+        working_buffer << string.gsub(/(?<!^|\n)\z/, "\n")
+      else
+        string
+      end
+    end
+    alias text append
+
+    # Appends non HTML-escaped text to the content.
+    #
+    #   html_tag(:p) do
+    #     append! 'Foo & Bar'
+    #     append! '<evil>'
+    #   end
+    #   # => <p>
+    #   Foo & Bar
+    #   <evil>
+    #   </p>
+    #
+    # Shortcut for
+    #
+    #   append raw(content)
+    #
+    # @return [SafeString] Non HTML-escaped.
+    #
+    def append! content
+      append raw(content)
+    end
+    alias text! append!
 
     # Returns content that won't be HTML escaped when appended to content.
     #
@@ -206,10 +216,7 @@ module Tiny
     def raw val
       SafeString.new val.to_s
     end
-  end
 
-  # Buffering and capturing support.
-  module Buffering
     # Buffers calls to markup generating methods.
     # @see Markup
     # @see HTML
@@ -245,15 +252,6 @@ module Tiny
     end
 
     private
-    # Appends a string to the {working_buffer} if there is one.
-    def append string
-      if working_buffer 
-        working_buffer << string.gsub(/(?<!^|\n)\z/, "\n")
-      else
-        string
-      end
-    end
-
     # Pushing and popping.
     def buffer_stack
       @buffer_stack ||= []
@@ -262,10 +260,6 @@ module Tiny
     # Current buffer from the buffer stack.
     def working_buffer
       buffer_stack.last
-    end
-
-    def block_from_template? block
-      false
     end
   end
 
@@ -420,7 +414,7 @@ module Tiny
         next markup unless block_given?
         markup do |args|
           context = eval('self', block.binding)
-          append context.instance_eval{ with_buffer(*args, &block) } 
+          append! context.instance_eval{ with_buffer(*args, &block) } 
         end
       end
     end
@@ -453,16 +447,14 @@ module Tiny
   #
   #     def markup
   #       form(:action => @action) do
-  #         ...
   #         fieldset do
   #           yield(self)
   #         end
-  #         ...
   #       end
   #     end
   #
   #     def text_input(name, value)
-  #       text! TextInput.new(name, value).to_html
+  #       TextInput.new(name, value).to_html
   #     end
   #   end
   #
@@ -482,8 +474,21 @@ module Tiny
   #   end
   #
   #   my_form('/login') do |form|
-  #     form.text_input 'email', 'email@example.com'
+  #     append! form.text_input 'email', 'email@example.com'
   #   end
+  #   # => <form action="/login">
+  #     ...
+  #     <fieldset>
+  #       <label for="email">Email</label>
+  #       <input type="text" id="email" name="email" value="email@example.com" />
+  #     </fieldset>
+  #     ...
+  #   </form>
+  #
+  #   # from template
+  #   <%= my_form('/login') do |form| %>
+  #     <%= form.text_input 'email', 'email@example.com' %>
+  #   <% end %>
   #   # => <form action="/login">
   #     ...
   #     <fieldset>

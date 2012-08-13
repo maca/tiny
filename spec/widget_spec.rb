@@ -13,7 +13,7 @@ describe Tiny::Widget do
     it 'should output content' do
       output = Class.new(Tiny::Widget) do
         def markup
-          text! '<div></div>'
+          append! '<div></div>'
         end
       end.new.to_html
       output.should == "<div></div>\n"
@@ -22,9 +22,9 @@ describe Tiny::Widget do
     it 'should output content with block' do
       output = Class.new(Tiny::Widget) do
         def markup
-          text! "<div>"
+          append! "<div>"
           yield
-          text! "</div>"
+          append! "</div>"
         end
       end.new.to_html { text 'Hello' }
       output.should == "<div>\nHello\n</div>\n"
@@ -131,7 +131,7 @@ describe Tiny::Widget do
   describe 'view helpers using Widget' do
     include FormHelper
     before do
-      @output = my_form('/login') { |form| append form.text_input 'email', 'email@example.com' }
+      @output = my_form('/login') { |form| append! form.text_input 'email', 'email@example.com' }
     end
     it_should_behave_like 'it renders my form'
   end
