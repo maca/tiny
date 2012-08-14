@@ -28,7 +28,7 @@ info.
 
     require 'tiny'
 
-    class MyPage < Page
+    class MyPage < Tiny::Widget
       def markup
         html do
           head do
@@ -67,24 +67,14 @@ basic one is `html_tag` aliased as `tag`.
     tag(:ul) do
       tag(:li) do
         tag :a, 'Home', :class => 'home', :href => '/'
-      end
-      tag(:li) do
-        tag :a, 'About', :class => 'about', :href => '/about'
-      end
-      tag(:li) do
-        tag :a, 'Home', :class => 'products', :href => '/products'
-      end
+      end  
+      ...
     end
     # => <ul>
       <li>
         <a class="home" href="/">Home</a>
       </li>
-      <li>
-        <a class="about" href="/about">About</a>
-      </li>
-      <li>
-        <a class="products" href="/products">Home</a>
-      </li>
+      ...
     </ul>
 
 ## HTML tags
@@ -107,26 +97,8 @@ attributes hash or by passing a content block.
 ## Markup
 
 Other methods for generating markup are `text` for appending HTML
-escaped text, text! or append! for appending HTML, `comment`, `cdata`
+escaped `text`, `text!` or `append!` for appending HTML, `comment`, `cdata`
 and `doctype`.
-
-    html_tag(:p) do
-      text 'Lorem ipsum...'
-      text '<script src="evil.js"></script>'
-    end
-    # => <p>
-    Lorem ipsum
-    &lt;script src=&quot;evil.js&quot;&gt;&lt;&#x2F;script&gt;
-    </p>
-
-    comment('foo')
-    # => <!-- foo -->
-
-    cdata('foo')
-    # => <![CDATA[foo]]>
-
-    doctype
-    # => <!DOCTYPE html>
 
 The method `with_buffer` is for capturing template content, just like
 Rails `capture` but it also serves for concatenating content.
@@ -152,21 +124,6 @@ that generated strings need not to be explicitly concatenated.
 Including `Tiny::HTML` gives access to shortcuts for HTML tags. Caution
 must be exercised because its quite a few methods.
 
-    include Tiny::Helpers
-    include Tiny::HTML
-
-    html do
-      head do
-        title "Hello"
-      end
-      body do
-        h1 "Hello"
-        p :class => 'content' do
-          text "Lorem ipsum..."
-        end
-      end
-    end
-
 ## View Inheritance
 
     class Template < Tiny::Widget
@@ -191,17 +148,17 @@ must be exercised because its quite a few methods.
           tag(:ul) do
             tag(:li) do
               tag :a, 'Home', :class => 'home', :href => '/'
-            end
+            end  
             tag(:li) do
               tag :a, 'About', :class => 'about', :href => '/about'
-            end
+            end  
             tag(:li) do
               tag :a, 'Home', :class => 'products', :href => '/products'
-            end
+            end  
           end
         end
       end
-
+      
       def footer_content
         footer do
           text '© 2012'
@@ -251,7 +208,7 @@ must be exercised because its quite a few methods.
         </footer>
       </body>
     </html>
-
+ 
 
 ## View helpers for HAML and ERB templates
 
@@ -295,7 +252,7 @@ concatenates the result of calling it.
 
     def my_form(action, &block)
       # the block is forwarded to MyForm#to_html
-      MyForm.new(action).to_html(&block)
+      MyForm.new(action).to_html(&block) 
     end
 
 Using the helper from an ERB template, note that Tiny allows explicitly
@@ -334,7 +291,7 @@ Whether this is or isn't a good idea is up to you.
 
     class User < Model
       include Tiny::Rendering
-
+    
       def markup
         div(:id => "user-#{self.id}") do
           img :src => self.avatar_url
@@ -347,7 +304,7 @@ Whether this is or isn't a good idea is up to you.
         end
       end
     end
-
+    
     user = User.create(:first_name => 'Macario',
       :last_name => 'Ortega',
       :avatar_url => 'http://example.com/profile/dbg.jpeg')
