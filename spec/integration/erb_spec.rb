@@ -17,7 +17,7 @@ describe 'markup helpers' do
   def check_block &block
     erb_block?(block).should be_true
   end
- 
+
   it 'should determine block origin' do
     Tilt['erb'].new { '<% check_block do %><% end  %>' }.render(self)
   end
@@ -51,7 +51,7 @@ describe 'markup helpers' do
   describe 'block passing' do
     describe 'shallow' do
       before do
-        @output = Tilt['erb'].new(:outvar => '@_out_buf') do 
+        @output = Tilt['erb'].new(:outvar => '@_out_buf') do
           <<-ERB
             <%= tag(:div) do %>
               <%= tag(:a) do %>
@@ -73,7 +73,7 @@ describe 'markup helpers' do
       it_should_behave_like 'it renders my list'
     end
   end
-  
+
   describe 'with helpers' do
     before do
       @output = Renderer.new('erb_list_with_helpers.erb').render

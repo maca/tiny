@@ -42,7 +42,7 @@ describe 'markup helpers' do
 
       it 'should allow passing content as string' do
         tag(:h1, "Hello").should == "<h1>Hello</h1>"
-        tag(:h1, "Hello", :class => 'main').should == %{<h1 class="main">Hello</h1>} 
+        tag(:h1, "Hello", :class => 'main').should == %{<h1 class="main">Hello</h1>}
       end
 
       it 'should escape attribute html' do
@@ -63,7 +63,7 @@ describe 'markup helpers' do
 
       describe 'deeper blocks' do
         before do
-          @output = tag(:div) do 
+          @output = tag(:div) do
             tag(:a) do
               text 'Hello'
               tag(:img)
@@ -128,7 +128,7 @@ describe 'markup helpers' do
         it { output.should have_css 'ul > li > a', :text => 'Two' }
         it { output.should have_css 'ul > li > a', :text => 'Three' }
       end
-      
+
       describe 'outside content block' do
         it 'should not buffer contiguous tags' do
           tag(:span)
@@ -153,7 +153,7 @@ describe 'markup helpers' do
       it 'should buffer with newlines and indentation' do
         output = tag(:ul) do
           tag :li
-          tag :li 
+          tag :li
         end
         output.should == "<ul>\n  <li></li>\n  <li></li>\n</ul>"
       end
@@ -211,7 +211,7 @@ describe 'markup helpers' do
       it 'should buffer doctype' do
         output = with_buffer{ doctype and tag(:html) }
         output.should == "<!DOCTYPE html>\n<html></html>\n"
-         
+
       end
     end
   end
@@ -293,10 +293,10 @@ describe 'markup helpers' do
           self.send(tag_name).should == "<#{tag_name}></#{tag_name}>"
         end
       end
-      
+
       it "should render content and attributes" do
-        h1(:class => 'main') { text "Hello" }.should == %{<h1 class="main">\n  Hello\n</h1>} 
-        h1("Hello", :class => 'main').should == %{<h1 class="main">Hello</h1>} 
+        h1(:class => 'main') { text "Hello" }.should == %{<h1 class="main">\n  Hello\n</h1>}
+        h1("Hello", :class => 'main').should == %{<h1 class="main">Hello</h1>}
       end
     end
   end

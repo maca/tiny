@@ -28,7 +28,7 @@ describe 'markup helpers' do
   describe 'passing blocks' do
     describe 'shallow' do
       before do
-        @output = Tilt['haml'].new do 
+        @output = Tilt['haml'].new do
           <<-HAML
 = tag(:div) do
   = tag(:a) do

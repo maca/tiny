@@ -29,6 +29,6 @@ module FormHelper
   end
 
   def my_form(action, &block)
-    MyForm.new(action).to_html(&block) 
+    MyForm.new(action).to_html(&block)
   end
 end

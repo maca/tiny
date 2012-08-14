@@ -130,7 +130,7 @@ module Tiny
     #
     #   div do
     #     cdata 'foo'
-    #   end 
+    #   end
     #   # => <div>
     #   <![CDATA[foo]]>
     #   </div>
@@ -179,7 +179,7 @@ module Tiny
     #
     def append string
       string = Helpers.sanitize(string)
-      if working_buffer 
+      if working_buffer
         working_buffer << string.gsub(/(?<!^|\n)\z/, "\n")
       else
         string
@@ -242,7 +242,7 @@ module Tiny
     #
     # @param args [any] n number of arguments to be passed to block evaluation.
     # @yield [*args] Content block.
-    # 
+    #
     # @return [String] HTML markup.
     #
     def with_buffer *args, &block
@@ -299,7 +299,7 @@ module Tiny
     def with_buffer *args, &block
       erb_block?(block) ? capture_erb(*args, &block) : super
     end
-    
+
     # Capture a section of an ERB template.
     #
     # @param args [any] n number of arguments to be passed to block evaluation
@@ -345,7 +345,7 @@ module Tiny
     # returns true)
     #
     # @param value [String, Object]
-    # @return [String]  
+    # @return [String]
     #
     def self.sanitize value
       if value.respond_to?(:html_safe?) && value.html_safe?
@@ -414,7 +414,7 @@ module Tiny
         next markup unless block_given?
         markup do |args|
           context = eval('self', block.binding)
-          append! context.instance_eval{ with_buffer(*args, &block) } 
+          append! context.instance_eval{ with_buffer(*args, &block) }
         end
       end
     end
@@ -437,7 +437,7 @@ module Tiny
     def block_from_template? block
       block && eval('defined?(output_buffer)', block.binding) == 'local-variable'
     end
-  end 
+  end
 
   # @example
   #   class MyForm < Tiny::Widget
@@ -470,7 +470,7 @@ module Tiny
   #   end
   #
   #   def my_form(action, &block)
-  #     MyForm.new(action).to_html(&block) 
+  #     MyForm.new(action).to_html(&block)
   #   end
   #
   #   my_form('/login') do |form|

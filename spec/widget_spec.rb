@@ -8,7 +8,7 @@ describe Tiny::Widget do
   let(:output) do
     Capybara::Node::Simple.new(@output)
   end
-  
+
   describe "simple widget" do
     it 'should output content' do
       output = Class.new(Tiny::Widget) do
@@ -77,7 +77,7 @@ describe Tiny::Widget do
 
   describe 'rendering a tag from outside' do
     before do
-      @title  = "Content" # no need to smuggle instance variables 
+      @title  = "Content" # no need to smuggle instance variables
       @output = Class.new(Tiny::Widget) do
         def markup
           div :id => :content do
