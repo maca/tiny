@@ -1,18 +1,29 @@
 require 'erubis'
 require 'tilt/erb'
 
-class String
-  def append= obj
-    self << obj.to_s
-  end
-
-  def append_escaped= obj
-    self << Tiny::Helpers.sanitize(obj.to_s)
-  end
-end
-
 module Tiny
+  # Support for emitting explicitly the result of calls to methods that
+  # take blocks. Based on the Rails ERB hack.
+  #
+  #   <%= my_method do %>
+  #     ...
+  #   <% end %>
+  #
+  # It overrides Tilt default Template classes for Erubis.
+  #
   module Erubis
+    # @see Erubis
+    class ::String
+      def append= obj
+        self << obj.to_s
+      end
+
+      def append_escaped= obj
+        self << Tiny::Helpers.sanitize(obj.to_s)
+      end
+    end
+
+    # @see Erubis
     module ErubyExtensions
       def add_expr_literal src, code
         src << "_buf.append= #{code};"
@@ -23,14 +34,17 @@ module Tiny
       end
     end
 
+    # @see Erubis
     class Eruby < ::Erubis::Eruby
       include ErubyExtensions
     end
 
+    # @see Erubis
     class EscapedEruby < ::Erubis::EscapedEruby
       include ErubyExtensions
     end
 
+    # @see Erubis
     class ErubisTemplate < ::Tilt::ErubisTemplate
       def prepare
         engine_class = options.delete(:engine_class) || Eruby

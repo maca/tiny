@@ -1,4 +1,5 @@
 module Tiny
+  # @see Markup#html_tag
   class Tag
     attr_reader :tag_name, :attrs
     def initialize tag_name, aoc = {}, attrs = nil
