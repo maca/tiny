@@ -57,7 +57,11 @@ info.
     </html>
 
 
-## Inline
+## Markup Helpers
+
+There are a few was of generating markup with Tiny, while one is by
+encapsulated classes inheriting from `Tiny::Widget`, another one is
+doing it inline by including `Tiny::Helpers` in any context.
 
 Including `Tiny::Helpers` gives access to a handfull of methods, the
 basic one is `html_tag` aliased as `tag`.
@@ -116,20 +120,48 @@ Tiny ActionView helpers are allready included in ActionView, no further
 step is required for using Tiny in Rails view helpers, just use `html_tag`
 instead of `tag` because ActionView allready defines `tag`.
 
-The advantage over Rails' markup method such as tag and content\_tag is
+The advantage over Rails' markup method such as `tag` and `content\_tag` is
 that generated strings need not to be explicitly concatenated.
 
-In addition to defining view helpers to be used from templates, a Widget can
-substitute a template view with the benefit of inheritance. Currently no
-template handler es provided but is not all that cumbersome explicitly
+In addition to defining view helpers to be used from templates, a
+`Widget` can substitute a template view with the benefit of inheritance.
+No template handler es provided but is not cumbersome explicitly
 rendering the Widget.
 
     controller Products
       def index
         products = Product.all
-        render :text => ProductList.new(products).to_html
+        render :text => MyProductList.new(products).to_html
       end
       ...
+    end
+
+## Sinatra
+
+For using the markup helpers:
+    
+    class MyApp < Sinatra::Base
+      helpers Tiny::Helpers
+        
+      get '/home' do
+        with_buffer do
+          doctype
+          html do
+            ...
+          end
+        end
+      end
+    end
+
+Rendering `Tiny::Widgets`
+    
+    class MyApp < Sinatra::Base
+      get '/products' do
+        products = Product.all
+        MyProductList.new(products).to_html
+      end
+    end
+
 
 ## Shortcuts
 
@@ -223,7 +255,7 @@ must be exercised because its quite a few methods.
 ## View helpers for HAML and ERB templates
 
 One of the Tiny's main goals is providing facilities for defining view
-helpers that can be used from ruby or templating laguages regardless of
+helpers that can be used from Ruby or templating laguages regardless of
 the web framework.
 
 A Widget can take a block while calling `to_html`. Tiny can determine

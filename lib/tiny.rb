@@ -425,10 +425,21 @@ module Tiny
     include Buffering
     include Markup
 
+    # Extracts a section of a template or buffers a block not
+    # originated from an template.
+    #
+    # @see Buffering#with_buffer
+    #
+    # @param args [any] n number of arguments to be passed to block evaluation.
+    # @yield [*args] HAML block or content block.
+    # @return [String] HTML markup.
+    #
     def with_buffer *args, &block
       block_from_template?(block) ? capture(*args, &block) : super
     end
 
+    # Appends sanitized text to the content.
+    # @see Buffering#append
     def append markup
       super(markup).html_safe
     end
@@ -504,6 +515,5 @@ module Tiny
     include Rendering
   end
 
-  Sinatra.register self if defined?(Sinatra)
   ActionView::Base.send :include, ActionViewAdditions if defined?(ActionView)
 end
