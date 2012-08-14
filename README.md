@@ -119,6 +119,18 @@ instead of `tag` because ActionView allready defines `tag`.
 The advantage over Rails' markup method such as tag and content\_tag is
 that generated strings need not to be explicitly concatenated.
 
+In addition to defining view helpers to be used from templates, a Widget can
+substitute a template view with the benefit of inheritance. Currently no
+template handler es provided but is not all that cumbersome explicitly
+rendering the Widget.
+
+    controller Products
+      def index
+        products = Product.all
+        render :text => ProductList.new(products).to_html
+      end
+      ...
+
 ## Shortcuts
 
 Including `Tiny::HTML` gives access to shortcuts for HTML tags. Caution
@@ -160,9 +172,7 @@ must be exercised because its quite a few methods.
       end
       
       def footer_content
-        footer do
-          text '© 2012'
-        end
+        footer "© 2012"
       end
     end
 
