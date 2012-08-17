@@ -120,18 +120,43 @@ Tiny ActionView helpers are allready included in ActionView, no further
 step is required for using Tiny in Rails view helpers, just use `html_tag`
 instead of `tag` because ActionView allready defines `tag`.
 
-The advantage over Rails' markup method such as `tag` and `content\_tag` is
+You will be able to call `html_tag`, `with_buffer`, `text`, `append!`,
+and the rest of Tiny's markup generation methods from your view helper
+modules.
+
+The advantage over Rails' markup method such as `tag` and `content_tag` is
 that generated strings need not to be explicitly concatenated.
 
 In addition to defining view helpers to be used from templates, a
 `Widget` can substitute a template view with the benefit of inheritance.
+
 No template handler es provided but is not cumbersome explicitly
 rendering the Widget.
+There is no enforcement on where widgets are placed but a logical
+place would be under `"#{Rails.root}/app/widgets"` and autoloading the
+directory in environment.rb
 
-    controller Products
+    $ mkdir app/widgets
+    # config/application.rb
+    ...
+    module MyRailsApp
+      class Application < Rails::Application
+        ...
+        config.autoload_paths += %W(#{config.root}/widgets)
+        ...
+      end
+    end
+
+    # app/widgets/product_list.rb
+    class ProductList < Tiny::Widget
+    ...
+    end
+
+    # app/controllers/products_controller.rb
+    controller Products < ApplicationController
       def index
         products = Product.all
-        render :text => MyProductList.new(products).to_html
+        render :text => ProductList.new(products).to_html
       end
       ...
     end
@@ -189,15 +214,15 @@ must be exercised because its quite a few methods.
 
       def navigation
         nav(:id) do
-          tag(:ul) do
-            tag(:li) do
-              tag :a, 'Home', :class => 'home', :href => '/'
+          ul do
+            li do
+              a('Home', :class => 'home', :href => '/')
             end  
-            tag(:li) do
-              tag :a, 'About', :class => 'about', :href => '/about'
+            li do
+              a('About', :class => 'about', :href => '/about')
             end  
-            tag(:li) do
-              tag :a, 'Home', :class => 'products', :href => '/products'
+            li do
+              a('Home', :class => 'products', :href => '/products')
             end  
           end
         end
@@ -361,8 +386,49 @@ Whether this is or isn't a good idea is up to you.
       </dl>
     </div>
 
+## No code is better than no code
 
-== LICENSE:
+LOC count.
+
+Erector
+
+    $ cloc erector/lib
+    http://cloc.sourceforge.net v 1.56  T=0.5 s (102.0 files/s, 43438.0 lines/s)
+    -------------------------------------------------------------------------------
+    Language                     files          blank        comment           code
+    -------------------------------------------------------------------------------
+    Ruby                            51            433            786          20500
+    -------------------------------------------------------------------------------
+    SUM:                            51            433            786          20500
+    -------------------------------------------------------------------------------
+
+Markaby
+
+    $ cloc markaby/lib
+    http://cloc.sourceforge.net v 1.56  T=0.5 s (24.0 files/s, 2142.0 lines/s)
+    -------------------------------------------------------------------------------
+    Language                     files          blank        comment           code
+    -------------------------------------------------------------------------------
+    Ruby                            12            133            177            761
+    -------------------------------------------------------------------------------
+    SUM:                            12            133            177            761
+    -------------------------------------------------------------------------------
+
+
+Tiny
+
+    $ cloc tiny/lib
+    http://cloc.sourceforge.net v 1.56  T=0.5 s (12.0 files/s, 1650.0 lines/s)
+    -------------------------------------------------------------------------------
+    Language                     files          blank        comment           code
+    -------------------------------------------------------------------------------
+    Ruby                             6             71            399            355
+    -------------------------------------------------------------------------------
+    SUM:                             6             71            399            355
+    -------------------------------------------------------------------------------
+
+
+## LICENSE:
 
 (The MIT License)
 
