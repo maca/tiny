@@ -21,11 +21,12 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'tilt', '~> 1.3'
   s.add_runtime_dependency 'escape_utils'
 
-  s.add_development_dependency 'rspec'
-  s.add_development_dependency 'capybara'
+  s.add_development_dependency 'rspec', '~> 2.11'
+  s.add_development_dependency 'nokogiri', '1.5.2'
+  s.add_development_dependency 'capybara', '~> 1.1'
   s.add_development_dependency 'erubis'
-  s.add_development_dependency 'haml'
-  s.add_development_dependency 'tilt'
-  s.add_development_dependency 'sinatra'
-  s.add_development_dependency 'rails'
+  s.add_development_dependency 'haml', '~> 3.1'
+  s.add_development_dependency 'tilt', '~> 1.3'
+  s.add_development_dependency 'sinatra', '> 1.3'
+  s.add_development_dependency 'rails', '~> 3.2'
 end
