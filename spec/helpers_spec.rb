@@ -226,6 +226,7 @@ describe 'markup helpers' do
         describe tag_name do
           it 'sould autoclose' do
             tag(tag_name).should == "<#{tag_name} />"
+            tag(tag_name.to_sym).should == "<#{tag_name} />"
           end
 
           it 'should omit content' do
@@ -253,6 +254,7 @@ describe 'markup helpers' do
       Tiny::HTML.content_tags.each do |tag_name|
         it "should not autoclose #{tag_name} if not empty" do
           tag(tag_name).should == "<#{tag_name}></#{tag_name}>"
+          tag(tag_name.to_sym).should == "<#{tag_name}></#{tag_name}>"
         end
       end
     end

@@ -41,7 +41,7 @@ module Tiny
     end
 
     def void_tag?
-      HTML.void_tags.include? tag_name
+      HTML.void_tags.include? tag_name.to_s
     end
   end
 end
