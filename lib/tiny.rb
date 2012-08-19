@@ -1,5 +1,4 @@
 require 'erubis'
-require 'haml'
 require 'tilt'
 require 'escape_utils'
 
