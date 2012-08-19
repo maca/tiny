@@ -277,7 +277,7 @@ module Tiny
     # @return [String] HTML markup.
     #
     def with_buffer *args, &block
-      ::Haml::Helpers.block_is_haml?(block) ? capture_haml(*args, &block) : super
+      defined?(Haml) && Haml::Helpers.block_is_haml?(block) ? capture_haml(*args, &block) : super
     end
   end
 
