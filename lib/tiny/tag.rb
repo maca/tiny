@@ -11,7 +11,7 @@ module Tiny
 
     def tag_attributes
       tag_attrs = attrs.map do |name, val|
-        next if val.nil? || val == []
+        next if val.nil? || val == [] || val == false
         next name if val == true
 
         vals = [*val].map do |value|

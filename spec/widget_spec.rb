@@ -17,6 +17,7 @@ describe Tiny::Widget do
         end
       end.new.to_html
       output.should == "<div></div>\n"
+      output.should be_html_safe
     end
 
     it 'should output content with block' do

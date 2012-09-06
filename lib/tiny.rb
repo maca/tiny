@@ -409,13 +409,14 @@ module Tiny
     # @see Widget.
     #
     def render &block
-      with_buffer do
+      output = with_buffer do
         next markup unless block_given?
         markup do |args|
           context = eval('self', block.binding)
           append! context.instance_eval{ with_buffer(*args, &block) }
         end
       end
+      SafeString.new output
     end
     alias to_html render
   end
