@@ -43,6 +43,8 @@ module Tiny
     #   # => <textarea disabled></textarea>
     #   html_tag(:textarea, :disabled => false)
     #   # => <textarea></textarea>
+    #   html_tag(:textarea, :disabled => nil)
+    #   # => <textarea></textarea>
     #
     # @example HTML-escaping
     #
