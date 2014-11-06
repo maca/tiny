@@ -18,7 +18,7 @@ describe 'markup helpers' do
 
   it 'should escape html when passing :escape_html => true option' do
     template = Tilt['erb'].new(nil, :escape_html => true) { %(<%= "<p>Hello World!</p>" %>) }
-    template.render.should == "&lt;p&gt;Hello World!&lt;&#47;p&gt;"
+    template.render.should == "&lt;p&gt;Hello World!&lt;/p&gt;"
   end
 
   it 'should not escape htmle when passing :escape_html => false option' do

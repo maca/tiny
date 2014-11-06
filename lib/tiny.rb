@@ -1,6 +1,6 @@
 require 'erubis'
 require 'tilt'
-require 'escape_utils'
+require 'cgi'
 
 require 'tiny/version'
 require 'tiny/erubis'
@@ -352,8 +352,12 @@ module Tiny
       if value.respond_to?(:html_safe?) && value.html_safe?
         value.to_s
       else
-        EscapeUtils.escape_html value.to_s
+        escape_html value.to_s
       end
+    end
+
+    def self.escape_html html
+      CGI.escapeHTML html.to_s
     end
   end
 

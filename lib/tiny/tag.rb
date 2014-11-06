@@ -15,7 +15,7 @@ module Tiny
         next name if val == true
 
         vals = [*val].map do |value|
-          EscapeUtils.escape_html value.to_s, false
+          Helpers.escape_html value
         end
 
         %{#{name}="#{vals.join(' ')}"}
