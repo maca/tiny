@@ -16,27 +16,27 @@ describe 'Rails compatibility', :type => :request do
     before do
       visit '/erb'
     end
-    it_should_behave_like 'it renders my list'
+    it_behaves_like 'it renders my list'
   end
 
   describe 'using Tiny helpers from erb template' do
     before do
       visit '/erb_helpers'
     end
-    it_should_behave_like 'it renders my list'
+    it_behaves_like 'it renders my list'
   end
 
   describe 'using Tiny from haml template' do
     before do
       visit '/haml'
     end
-    it_should_behave_like 'it renders my list'
+    it_behaves_like 'it renders my list'
   end
 
   describe 'using Tiny helpers from haml template' do
     before do
       visit '/haml_helpers'
     end
-    it_should_behave_like 'it renders my list'
+    it_behaves_like 'it renders my list'
   end
 end

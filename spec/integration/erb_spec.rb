@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'spec_helper'
 
-describe 'markup helpers' do
+describe 'markup helpers', :type => :request do
   include Tiny::Helpers
 
   let(:output) do
@@ -15,7 +15,7 @@ describe 'markup helpers' do
   end
 
   def check_block &block
-    erb_block?(block).should be_true
+    expect(erb_block?(block)).to be_truthy
   end
 
   it 'should determine block origin' do
@@ -23,29 +23,29 @@ describe 'markup helpers' do
   end
 
   it 'should capture erb' do
-    Tilt['erb'].new { '<% mk = with_buffer("Tiny!") do |s| %>Hello <%= s %><% end %><%- mk.should == "Hello Tiny!" %>' }.render(self)
+    Tilt['erb'].new { '<% mk = with_buffer("Tiny!") do |s| %>Hello <%= s %><% end %><%- expect(mk).to eq "Hello Tiny!" %>' }.render(self)
   end
 
   it 'should emit tag' do
     @output = Tilt['erb'].new { '<%= tag(:div) %>' }.render(self)
-    output.should have_css 'div', :count => 1
+    expect(output).to have_css 'div', :count => 1
   end
 
   it 'should not buffer multiple tags' do
     template = Tilt['erb'].new { '<%= yield %>' }
     output   = template.render(self) { tag(:span); tag(:a) }
-    output.should == '<a></a>'
+    expect(output).to eq('<a></a>')
   end
 
   it 'should buffer multiple tags inside with_buffer block' do
     template = Tilt['erb'].new { '<%= yield %>' }
     output   = template.render(self) { with_buffer { tag(:span); tag(:a) }  }
-    output.should == "<span></span>\n<a></a>\n"
+    expect(output).to eq("<span></span>\n<a></a>\n")
   end
 
   it 'should concat erb block' do
     template = Tilt['erb'].new(:outvar => '@_out_buf') { '<%= span do %>Hello<% end %>' }
-    template.render(self).should == "<span>\n  Hello\n</span>\n"
+    expect(template.render(self)).to eq("<span>\n  Hello\n</span>\n")
   end
 
   describe 'block passing' do
@@ -61,9 +61,9 @@ describe 'markup helpers' do
           ERB
         end.render(self)
       end
-      it { output.should have_css 'div',     :count => 1 }
-      it { output.should have_css 'a',       :count => 1 }
-      it { output.should have_css 'div > a', :text => 'Hello' }
+      it { expect(output).to have_css 'div',     :count => 1 }
+      it { expect(output).to have_css 'a',       :count => 1 }
+      it { expect(output).to have_css 'div > a', :text => 'Hello' }
     end
 
     describe 'nested' do

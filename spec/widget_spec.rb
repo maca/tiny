@@ -16,8 +16,8 @@ describe Tiny::Widget do
           append! '<div></div>'
         end
       end.new.to_html
-      output.should == "<div></div>\n"
-      output.should be_html_safe
+      expect(output).to eq("<div></div>\n")
+      expect(output).to be_html_safe
     end
 
     it 'should output content with block' do
@@ -28,7 +28,7 @@ describe Tiny::Widget do
           append! "</div>"
         end
       end.new.to_html { text 'Hello' }
-      output.should == "<div>\nHello\n</div>\n"
+      expect(output).to eq("<div>\nHello\n</div>\n")
     end
   end
 
@@ -36,16 +36,17 @@ describe Tiny::Widget do
     before do
       @output = Class.new(Tiny::Widget) do
         def markup
-          head { title "Tiny Page!" }
-          body { h1 "Hello Tiny!" }
+          html {
+            head { title "Tiny Page!" }
+            body { h1 "Hello Tiny!" }
+          }
         end
       end.new.to_html
     end
 
-    it { output.should have_css 'head', :count => 1 }
-    it { output.should have_css 'head > title', :text => "Tiny Page!", :count => 1 }
-    it { output.should have_css 'body', :count => 1 }
-    it { output.should have_css 'body > h1', :text => "Hello Tiny!", :count => 1 }
+    it { expect(output).to have_title "Tiny Page!" }
+    it { expect(output).to have_css 'body', :count => 1 }
+    it { expect(output).to have_css 'body > h1', :text => "Hello Tiny!", :count => 1 }
   end
 
   describe 'content from different methods' do
@@ -70,10 +71,10 @@ describe Tiny::Widget do
       end.new.to_html
     end
 
-    it { output.should have_css 'div#notices', :count => 1 }
-    it { output.should have_css 'div#notices > h1', :text => "Notices", :count => 1 }
-    it { output.should have_css 'div#content', :count => 1 }
-    it { output.should have_css 'div#content > h1', :text => "Content", :count => 1 }
+    it { expect(output).to have_css 'div#notices', :count => 1 }
+    it { expect(output).to have_css 'div#notices > h1', :text => "Notices", :count => 1 }
+    it { expect(output).to have_css 'div#content', :count => 1 }
+    it { expect(output).to have_css 'div#content > h1', :text => "Content", :count => 1 }
   end
 
   describe 'rendering a tag from outside' do
@@ -88,8 +89,8 @@ describe Tiny::Widget do
       end.new.to_html { tag :h1, @title }
     end
 
-    it { output.should have_css 'div#content', :count => 1 }
-    it { output.should have_css 'div#content > h1', :text => "Content", :count => 1 }
+    it { expect(output).to have_css 'div#content', :count => 1 }
+    it { expect(output).to have_css 'div#content > h1', :text => "Content", :count => 1 }
   end
 
   describe 'rendering a block from outside with concatenated tags' do
@@ -101,9 +102,9 @@ describe Tiny::Widget do
       end.new.to_html { tag(:h1, "Title"); tag(:p, "Content") }
     end
 
-    it { output.should have_css 'div#content', :count => 1 }
-    it { output.should have_css 'div#content > h1', :text => "Title", :count => 1 }
-    it { output.should have_css 'div#content > p', :text => "Content", :count => 1 }
+    it { expect(output).to have_css 'div#content', :count => 1 }
+    it { expect(output).to have_css 'div#content > h1', :text => "Title", :count => 1 }
+    it { expect(output).to have_css 'div#content > p', :text => "Content", :count => 1 }
   end
 
   describe 'rendering an erb block' do
@@ -116,16 +117,16 @@ describe Tiny::Widget do
       @output = Tilt['erb'].new { '<%= widget.to_html do %><h1>Title</h1><p>Content</p><% end %>' }.render(self, :widget => widget)
     end
 
-    it { output.should have_css 'div#content', :count => 1 }
-    it { output.should have_css 'div#content > h1', :text => "Title", :count => 1 }
-    it { output.should have_css 'div#content > p', :text => "Content", :count => 1 }
+    it { expect(output).to have_css 'div#content', :count => 1 }
+    it { expect(output).to have_css 'div#content > h1', :text => "Title", :count => 1 }
+    it { expect(output).to have_css 'div#content > p', :text => "Content", :count => 1 }
   end
 
   describe 'widget with no content overriden' do
     it 'should raise not implemented' do
-      lambda do
+      expect do
         Class.new(Tiny::Widget).new.to_html
-      end.should raise_error(NotImplementedError)
+      end.to raise_error(NotImplementedError)
     end
   end
 

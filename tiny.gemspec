@@ -18,13 +18,12 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
 
-  s.add_runtime_dependency 'tilt', '~> 1.3'
-  s.add_runtime_dependency 'erubis', '~> 2.7'
+  s.add_runtime_dependency 'tilt'
+  s.add_runtime_dependency 'erubis'
 
-  s.add_development_dependency 'rspec', '~> 2.14'
-  s.add_development_dependency 'nokogiri', '1.5.2'
-  s.add_development_dependency 'capybara', '~> 1.1'
+  s.add_development_dependency 'rspec', '~> 3.1.0'
+  s.add_development_dependency 'capybara', '~> 2.4.0'
   s.add_development_dependency 'haml', '~> 3.1'
-  s.add_development_dependency 'sinatra' # I trust Sinatra
-  s.add_development_dependency 'rails', '~> 3.2'
+  s.add_development_dependency 'sinatra'
+  s.add_development_dependency 'rails', '~> 4.1.0'
 end
