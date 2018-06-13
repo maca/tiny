@@ -108,7 +108,7 @@ module Tiny
     #   </form>
     #
     #
-    def html_tag name, attrs_or_content = {}, attrs = nil, &block
+    def html_tag(name, attrs_or_content = {}, attrs = nil, &block)
       append! Tag.new(name, attrs_or_content, attrs).render(&block)
     end
 
@@ -123,7 +123,7 @@ module Tiny
     #
     # @return [SafeString] HTML content.
     #
-    def comment content
+    def comment(content)
       append! "<!-- #{content.to_s.gsub(/-(?=-)/, '- ')} -->"
     end
 
@@ -138,7 +138,7 @@ module Tiny
     #
     # @return [String] CDATA section.
     #
-    def cdata content
+    def cdata(content)
       content = content.to_s.gsub(']]>', ']]]]><![CDATA[>')
       append! "<![CDATA[#{content}]]>"
     end
@@ -178,7 +178,7 @@ module Tiny
     #
     # @return [String] HTML-escaped.
     #
-    def append string
+    def append(string)
       string = Helpers.sanitize(string)
       if working_buffer
         working_buffer << string.gsub(/(?<!^|\n)\z/, "\n")
@@ -205,7 +205,7 @@ module Tiny
     #
     # @return [SafeString] Non HTML-escaped.
     #
-    def append! content
+    def append!(content)
       append raw(content)
     end
     alias text! append!
@@ -214,7 +214,7 @@ module Tiny
     #
     # @return [SafeString] Considered html safe.
     #
-    def raw val
+    def raw(val)
       SafeString.new val.to_s
     end
 
@@ -246,13 +246,14 @@ module Tiny
     #
     # @return [String] HTML markup.
     #
-    def with_buffer *args, &block
+    def with_buffer(*args)
       buffer_stack << ''
-      yield *args
+      yield(*args)
       buffer_stack.pop
     end
 
     private
+
     # Pushing and popping.
     def buffer_stack
       @buffer_stack ||= []
@@ -278,7 +279,7 @@ module Tiny
     # @yield [*args] HAML block or content block.
     # @return [String] HTML markup.
     #
-    def with_buffer *args, &block
+    def with_buffer(*args, &block)
       defined?(Haml) && Haml::Helpers.block_is_haml?(block) ? capture_haml(*args, &block) : super
     end
   end
@@ -297,7 +298,7 @@ module Tiny
     # @yield [*args] ERB block or content block.
     # @return [String] HTML markup.
     #
-    def with_buffer *args, &block
+    def with_buffer(*args, &block)
       erb_block?(block) ? capture_erb(*args, &block) : super
     end
 
@@ -307,7 +308,7 @@ module Tiny
     # @return [String] HTML markup
     # @yield [*args]
     #
-    def capture_erb *args, &block
+    def capture_erb(*args, &block)
       output_buffer = eval('_buf', block.binding)
       buffer = output_buffer.dup
       output_buffer.clear and yield(*args)
@@ -320,7 +321,7 @@ module Tiny
     #
     # @param block [Proc] a Proc object
     #
-    def erb_block? block
+    def erb_block?(block)
       block && eval('defined?(__in_erb_template)', block.binding)
     end
   end
@@ -337,7 +338,7 @@ module Tiny
     #
     # @return [String] HTML markup
     #
-    def tag name, attrs_or_content = {}, attrs = nil, &block
+    def tag(name, attrs_or_content = {}, attrs = nil, &block)
       html_tag name, attrs_or_content, attrs, &block
     end
 
@@ -348,7 +349,7 @@ module Tiny
     # @param value [String, Object]
     # @return [String]
     #
-    def self.sanitize value
+    def self.sanitize(value)
       if value.respond_to?(:html_safe?) && value.html_safe?
         value.to_s
       else
@@ -356,7 +357,7 @@ module Tiny
       end
     end
 
-    def self.escape_html html
+    def self.escape_html(html)
       CGI.escapeHTML html.to_s
     end
   end
@@ -414,7 +415,7 @@ module Tiny
     # @return [String] HTML markup.
     # @see Widget.
     #
-    def render &block
+    def render(&block)
       output = with_buffer do
         next markup unless block_given?
         markup do |args|
@@ -440,18 +441,18 @@ module Tiny
     # @yield [*args] HAML block or content block.
     # @return [String] HTML markup.
     #
-    def with_buffer *args, &block
+    def with_buffer(*args, &block)
       block_from_template?(block) ? capture(*args, &block) : super
     end
 
     # Appends sanitized text to the content.
     # @see Buffering#append
-    def append markup
+    def append(markup)
       super(markup).html_safe
     end
 
     # Returns true if the block was originated in an ERB or HAML template.
-    def block_from_template? block
+    def block_from_template?(block)
       block && eval('defined?(output_buffer)', block.binding) == 'local-variable'
     end
   end

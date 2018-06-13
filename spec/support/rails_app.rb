@@ -5,8 +5,6 @@ ActionController::Base.view_paths = FIXTURES
 
 module RailsTestApp
   class Application < Rails::Application
-    config.secret_token = '572c86f5ede338bd8aba8dae0fd3a326aabababc98d1e6ce34b9f5'
-
     routes.draw do
       get '/erb'          => 'rails_test_app/test#erb'
       get '/erb_helpers'  => 'rails_test_app/test#erb_helpers'
@@ -23,19 +21,19 @@ module RailsTestApp
     end
 
     def erb
-      render :template => "erb_list"
+      render template: "erb_list"
     end
 
     def erb_helpers
-      render :template => "erb_list_with_helpers"
+      render template: "erb_list_with_helpers"
     end
 
     def haml
-      render :template => "haml_list"
+      render template: "haml_list"
     end
 
     def haml_helpers
-      render :template => "haml_list_with_helpers"
+      render template: "haml_list_with_helpers"
     end
   end
 end

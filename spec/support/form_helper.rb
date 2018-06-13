@@ -5,7 +5,7 @@ module FormHelper
     end
 
     def markup
-      form(:action => @action) do
+      form(action: @action) do
         fieldset do
           yield(self)
         end
@@ -23,8 +23,8 @@ module FormHelper
     end
 
     def markup
-      label(@name.capitalize, :for => @name)
-      input(:type => 'text', :id => @name, :name => @name, :value => @value)
+      label(@name.capitalize, for: @name)
+      input(type: 'text', id: @name, name: @name, value: @value)
     end
   end
 

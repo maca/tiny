@@ -7,18 +7,15 @@ module Tiny
       # Void tag names.
       # Tags that should have no content.
       # @return [Array]
-      def content_tags
-        @content_tags
-      end
+      attr_reader :content_tags
 
       # Content tag names.
       # Tags that can have content.
       # @return [Array]
-      def void_tags
-        @void_tags
-      end
+      attr_reader :void_tags
 
       private
+
       # @macro tag_def
       #  @method $1(attrs_or_content = {}, attrs = nil, &block)
       #  Shortcut for {Markup#html_tag html_tag}(:$1)
@@ -30,7 +27,7 @@ module Tiny
       #
       #  @see Markup#html_tag
       #
-      def tag_def tag_name, void_tag = false
+      def tag_def(tag_name, void_tag = false)
         class_eval(<<-RUBY, __FILE__, __LINE__ + 1)
           def #{tag_name} *args, &block
             html_tag "#{tag_name}", *args, &block

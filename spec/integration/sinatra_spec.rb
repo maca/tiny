@@ -1,7 +1,7 @@
 require 'spec_helper'
 require "#{SUPPORT}/sinatra_app"
 
-describe 'Sinatra compatibility', :type => :request do
+describe 'Sinatra compatibility', type: :request do
   let(:output) do
     Capybara::Node::Simple.new(page.body)
   end

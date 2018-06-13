@@ -1,20 +1,20 @@
 # encoding: utf-8
 require 'spec_helper'
 
-describe 'markup helpers', :type => :request do
+describe 'markup helpers', type: :request do
   include Tiny::Helpers
 
   let(:output) do
     Capybara::Node::Simple.new(@output)
   end
 
-  def span &block
+  def span(&block)
     with_buffer do
       tag(:span, &block)
     end
   end
 
-  def check_block &block
+  def check_block(&block)
     expect(erb_block?(block)).to be_truthy
   end
 
@@ -28,7 +28,7 @@ describe 'markup helpers', :type => :request do
 
   it 'should emit tag' do
     @output = Tilt['erb'].new { '<%= tag(:div) %>' }.render(self)
-    expect(output).to have_css 'div', :count => 1
+    expect(output).to have_css 'div', count: 1
   end
 
   it 'should not buffer multiple tags' do
@@ -44,14 +44,14 @@ describe 'markup helpers', :type => :request do
   end
 
   it 'should concat erb block' do
-    template = Tilt['erb'].new(:outvar => '@_out_buf') { '<%= span do %>Hello<% end %>' }
+    template = Tilt['erb'].new(outvar: '@_out_buf') { '<%= span do %>Hello<% end %>' }
     expect(template.render(self)).to eq("<span>\n  Hello\n</span>\n")
   end
 
   describe 'block passing' do
     describe 'shallow' do
       before do
-        @output = Tilt['erb'].new(:outvar => '@_out_buf') do
+        @output = Tilt['erb'].new(outvar: '@_out_buf') do
           <<-ERB
             <%= tag(:div) do %>
               <%= tag(:a) do %>
@@ -61,9 +61,9 @@ describe 'markup helpers', :type => :request do
           ERB
         end.render(self)
       end
-      it { expect(output).to have_css 'div',     :count => 1 }
-      it { expect(output).to have_css 'a',       :count => 1 }
-      it { expect(output).to have_css 'div > a', :text => 'Hello' }
+      it { expect(output).to have_css 'div',     count: 1 }
+      it { expect(output).to have_css 'a',       count: 1 }
+      it { expect(output).to have_css 'div > a', text: 'Hello' }
     end
 
     describe 'nested' do

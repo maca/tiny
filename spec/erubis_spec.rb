@@ -12,17 +12,17 @@ describe 'markup helpers' do
   end
 
   it 'should use tiny escaped erubis engine for escaping html' do
-    engine = Tilt['erb'].new(nil, :escape_html => true){}.instance_variable_get(:@engine)
+    engine = Tilt['erb'].new(nil, escape_html: true){}.instance_variable_get(:@engine)
     expect(engine).to be_a Tiny::Erubis::EscapedEruby
   end
 
   it 'should escape html when passing :escape_html => true option' do
-    template = Tilt['erb'].new(nil, :escape_html => true) { %(<%= "<p>Hello World!</p>" %>) }
+    template = Tilt['erb'].new(nil, escape_html: true) { %(<%= "<p>Hello World!</p>" %>) }
     expect(template.render).to eq("&lt;p&gt;Hello World!&lt;/p&gt;")
   end
 
   it 'should not escape htmle when passing :escape_html => false option' do
-    template = Tilt['erb'].new(nil, :escape_html => false) { %(<%= "<p>Hello World!</p>" %>) }
+    template = Tilt['erb'].new(nil, escape_html: false) { %(<%= "<p>Hello World!</p>" %>) }
     expect(template.render).to eq("<p>Hello World!</p>")
   end
 
@@ -37,7 +37,7 @@ describe 'markup helpers' do
   end
 
   it 'should allow block with explicit output' do
-    template = Tilt['erb'].new nil, :escape_html => true do
+    template = Tilt['erb'].new nil, escape_html: true do
       <<-ERB
       <%= [1,2].each do |i| %>
       <% end %>

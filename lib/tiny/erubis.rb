@@ -14,22 +14,22 @@ module Tiny
   module Erubis
     # @see Erubis
     class ::String
-      def append= obj
+      def append=(obj)
         self << obj.to_s
       end
 
-      def append_escaped= obj
+      def append_escaped=(obj)
         self << Tiny::Helpers.sanitize(obj.to_s)
       end
     end
 
     # @see Erubis
     module ErubyExtensions
-      def add_expr_literal src, code
+      def add_expr_literal(src, code)
         src << "_buf.append= #{code};"
       end
 
-      def add_expr_escaped src, code
+      def add_expr_escaped(src, code)
         src << "_buf.append_escaped= #{code};"
       end
     end
@@ -49,11 +49,11 @@ module Tiny
       def prepare
         engine_class = options.delete(:engine_class) || Eruby
         engine_class = EscapedEruby if options.delete(:escape_html)
-        options.merge!(:engine_class => engine_class)
+        options.merge!(engine_class: engine_class)
         super
       end
 
-      def precompiled_preamble locals
+      def precompiled_preamble(locals)
         [super, "__in_erb_template=true"].join("\n")
       end
     end

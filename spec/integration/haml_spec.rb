@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'spec_helper'
 
-describe 'markup helpers', :type => :request do
+describe 'markup helpers', type: :request do
   include Tiny::Helpers
 
   let(:output) do
@@ -11,7 +11,7 @@ describe 'markup helpers', :type => :request do
   describe 'tag' do
     it 'should emit tag' do
       @output = Tilt['haml'].new { '= tag(:div)' }.render(self)
-      expect(output).to have_css 'div', :count => 1
+      expect(output).to have_css 'div', count: 1
     end
 
     it 'should emit haml block' do
@@ -21,7 +21,7 @@ describe 'markup helpers', :type => :request do
   Hello
         HAML
       end.render(self)
-      expect(output).to have_css 'div', :text => "Hello", :count => 1
+      expect(output).to have_css 'div', text: "Hello", count: 1
     end
   end
 
@@ -36,9 +36,9 @@ describe 'markup helpers', :type => :request do
           HAML
         end.render(self)
       end
-      it { expect(output).to have_css 'div',     :count => 1 }
-      it { expect(output).to have_css 'a',       :count => 1 }
-      it { expect(output).to have_css 'div > a', :text => 'Hello' }
+      it { expect(output).to have_css 'div',     count: 1 }
+      it { expect(output).to have_css 'a',       count: 1 }
+      it { expect(output).to have_css 'div > a', text: 'Hello' }
     end
 
     describe 'nested' do

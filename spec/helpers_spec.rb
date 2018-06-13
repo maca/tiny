@@ -12,16 +12,16 @@ describe 'markup helpers' do
     describe 'basic' do
       describe 'attributes and content' do
         before do
-          @output = tag(:li, :class => 'item', :id => 'hello') { text 'Hello' }
+          @output = tag(:li, class: 'item', id: 'hello') { text 'Hello' }
         end
-        it { expect(output).to have_css 'li', :count => 1 }
-        it { expect(output).to have_css 'li', :text => "Hello" }
+        it { expect(output).to have_css 'li', count: 1 }
+        it { expect(output).to have_css 'li', text: "Hello" }
         it { expect(output).to have_css 'li.item' }
         it { expect(output).to have_css 'li#hello' }
       end
 
       it 'should not use blank attribute values' do
-        output = tag(:li, :class => [], :id => nil)
+        output = tag(:li, class: [], id: nil)
         expect(output).to eq("<li></li>")
       end
 
@@ -41,18 +41,18 @@ describe 'markup helpers' do
       end
 
       it 'should output multiple classes passing an array' do
-        output = tag(:li, :class => %w(item in-stock))
+        output = tag(:li, class: %w(item in-stock))
         expect(output).to eq('<li class="item in-stock"></li>')
       end
 
       it 'should allow passing content as string' do
         expect(tag(:h1, "Hello")).to eq("<h1>Hello</h1>")
-        expect(tag(:h1, "Hello", :class => 'main')).to eq(%{<h1 class="main">Hello</h1>})
+        expect(tag(:h1, "Hello", class: 'main')).to eq(%(<h1 class="main">Hello</h1>))
       end
 
       it 'should escape attribute html' do
-        expect(tag(:a, :href => '<script>')).to eq('<a href="&lt;script&gt;"></a>')
-        expect(tag(:a, :href => 'art&copy')).to eq('<a href="art&amp;copy"></a>')
+        expect(tag(:a, href: '<script>')).to eq('<a href="&lt;script&gt;"></a>')
+        expect(tag(:a, href: 'art&copy')).to eq('<a href="art&amp;copy"></a>')
       end
     end
 
@@ -61,9 +61,9 @@ describe 'markup helpers' do
         before do
           @output = tag(:div) { tag(:a) { text 'Hello' } }
         end
-        it { expect(output).to have_css 'div', :count => 1 }
-        it { expect(output).to have_css 'a',   :count => 1 }
-        it { expect(output).to have_css 'div > a', :text => 'Hello' }
+        it { expect(output).to have_css 'div', count: 1 }
+        it { expect(output).to have_css 'a',   count: 1 }
+        it { expect(output).to have_css 'div > a', text: 'Hello' }
       end
 
       describe 'deeper blocks' do
@@ -75,11 +75,11 @@ describe 'markup helpers' do
             end
           end
         end
-        it { expect(output).to have_css 'div',     :count => 1 }
-        it { expect(output).to have_css 'a',       :count => 1 }
+        it { expect(output).to have_css 'div',     count: 1 }
+        it { expect(output).to have_css 'a',       count: 1 }
         it { expect(output).to have_css 'div > a' }
-        it { expect(output).to have_css 'div > a', :text => 'Hello' }
-        it { expect(output).to have_css 'img',     :count => 1 }
+        it { expect(output).to have_css 'div > a', text: 'Hello' }
+        it { expect(output).to have_css 'img',     count: 1 }
         it { expect(output).to have_css 'div > a > img' }
       end
     end
@@ -94,9 +94,9 @@ describe 'markup helpers' do
           end
         end
 
-        it { expect(output).to have_css 'ul',      :count => 1 }
-        it { expect(output).to have_css 'li',      :count => 3 }
-        it { expect(output).to have_css 'ul > li', :count => 3 }
+        it { expect(output).to have_css 'ul',      count: 1 }
+        it { expect(output).to have_css 'li',      count: 3 }
+        it { expect(output).to have_css 'ul > li', count: 3 }
       end
 
       describe 'concatenation with text' do
@@ -108,12 +108,12 @@ describe 'markup helpers' do
           end
         end
 
-        it { expect(output).to have_css 'ul',      :count => 1 }
-        it { expect(output).to have_css 'li',      :count => 3 }
-        it { expect(output).to have_css 'ul > li', :count => 3 }
-        it { expect(output).to have_css 'ul > li', :text => 'One' }
-        it { expect(output).to have_css 'ul > li', :text => 'Two' }
-        it { expect(output).to have_css 'ul > li', :text => 'Three' }
+        it { expect(output).to have_css 'ul',      count: 1 }
+        it { expect(output).to have_css 'li',      count: 3 }
+        it { expect(output).to have_css 'ul > li', count: 3 }
+        it { expect(output).to have_css 'ul > li', text: 'One' }
+        it { expect(output).to have_css 'ul > li', text: 'Two' }
+        it { expect(output).to have_css 'ul > li', text: 'Three' }
       end
 
       describe 'nested' do
@@ -125,13 +125,13 @@ describe 'markup helpers' do
           end
         end
 
-        it { expect(output).to have_css 'ul',          :count => 1 }
-        it { expect(output).to have_css 'li',          :count => 3 }
-        it { expect(output).to have_css 'ul > li',     :count => 3 }
-        it { expect(output).to have_css 'a',           :count => 3 }
-        it { expect(output).to have_css 'ul > li > a', :text => 'One' }
-        it { expect(output).to have_css 'ul > li > a', :text => 'Two' }
-        it { expect(output).to have_css 'ul > li > a', :text => 'Three' }
+        it { expect(output).to have_css 'ul',          count: 1 }
+        it { expect(output).to have_css 'li',          count: 3 }
+        it { expect(output).to have_css 'ul > li',     count: 3 }
+        it { expect(output).to have_css 'a',           count: 3 }
+        it { expect(output).to have_css 'ul > li > a', text: 'One' }
+        it { expect(output).to have_css 'ul > li > a', text: 'Two' }
+        it { expect(output).to have_css 'ul > li > a', text: 'Three' }
       end
 
       describe 'outside content block' do
@@ -165,7 +165,7 @@ describe 'markup helpers' do
 
       it 'should buffer with newlines after text' do
         output = tag(:ul) do
-          tag (:li) do
+          tag :li do
             text 'Hi'
             append! 'Hi'
           end
@@ -243,7 +243,7 @@ describe 'markup helpers' do
 
     describe 'content tags' do
       it 'should define content tags' do
-        tags  = %w(
+        tags = %w(
           article aside audio bdi canvas command datalist details
           figcaption figure header hgroup keygen mark meter nav output progress
           section source summary track video wbr a abbr address b bdo big
@@ -274,8 +274,8 @@ describe 'markup helpers' do
     end
 
     it { expect(output).to have_title "Tiny Page!" }
-    it { expect(output).to have_css 'body', :count => 1 }
-    it { expect(output).to have_css 'body > h1', :text => "Hello Tiny!", :count => 1 }
+    it { expect(output).to have_css 'body', count: 1 }
+    it { expect(output).to have_css 'body > h1', text: "Hello Tiny!", count: 1 }
   end
 
   describe 'dsl' do
@@ -284,25 +284,25 @@ describe 'markup helpers' do
     describe 'void tags' do
       Tiny::HTML.void_tags.each do |tag_name|
         it "should render '#{tag_name}'" do
-          expect(self.send(tag_name)).to eq("<#{tag_name} />")
+          expect(send(tag_name)).to eq("<#{tag_name} />")
         end
       end
 
       it "should render attributes" do
-        expect(link(:href => "some.css")).to eq('<link href="some.css" />')
+        expect(link(href: "some.css")).to eq('<link href="some.css" />')
       end
     end
 
     describe 'content tags' do
       Tiny::HTML.content_tags.each do |tag_name|
         it "should render '#{tag_name}'" do
-          expect(self.send(tag_name)).to eq("<#{tag_name}></#{tag_name}>")
+          expect(send(tag_name)).to eq("<#{tag_name}></#{tag_name}>")
         end
       end
 
       it "should render content and attributes" do
-        expect(h1(:class => 'main') { text "Hello" }).to eq(%{<h1 class="main">\n  Hello\n</h1>})
-        expect(h1("Hello", :class => 'main')).to eq(%{<h1 class="main">Hello</h1>})
+        expect(h1(class: 'main') { text "Hello" }).to eq(%(<h1 class="main">\n  Hello\n</h1>))
+        expect(h1("Hello", class: 'main')).to eq(%(<h1 class="main">Hello</h1>))
       end
     end
   end

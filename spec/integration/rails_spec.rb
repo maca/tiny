@@ -1,7 +1,7 @@
 require 'spec_helper'
 require "#{SUPPORT}/rails_app"
 
-describe 'Rails compatibility', :type => :request do
+describe 'Rails compatibility', type: :request do
   include Rack::Test::Methods
 
   let(:output) do

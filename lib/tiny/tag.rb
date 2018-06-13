@@ -2,9 +2,9 @@ module Tiny
   # @see Markup#html_tag
   class Tag
     attr_reader :tag_name, :attrs
-    def initialize tag_name, aoc = {}, attrs = nil
+    def initialize(tag_name, aoc = {}, attrs = nil)
       @attrs, @content =
-         Hash === aoc && attrs.nil?? [aoc] : [attrs || {}, aoc]
+         Hash === aoc && attrs.nil? ? [aoc] : [attrs || {}, aoc]
       @content  = Helpers.sanitize(@content) if @content
       @tag_name = tag_name
     end
@@ -18,13 +18,13 @@ module Tiny
           Helpers.escape_html value
         end
 
-        %{#{name}="#{vals.join(' ')}"}
+        %(#{name}="#{vals.join(' ')}")
       end.compact.join(' ')
 
       " #{tag_attrs}" unless tag_attrs.empty?
     end
 
-    def render &block
+    def render(&block)
       if void_tag?
         "<#{tag_name}#{tag_attributes} />"
       else
